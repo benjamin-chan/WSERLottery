@@ -1,6 +1,6 @@
 2013 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-04 13:26:26` using `R version 2.15.2 (2012-10-26)`.
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-04 15:18:08` using `R version 2.15.2 (2012-10-26)`.
 
 I was a little intrigued by how the Western States Endurance Run (WSER) calculated their lottery odds estimates. Their estimates can be found on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details).
 
@@ -124,38 +124,44 @@ end - start
 ```
 
 ```
-## Time difference of 2.9 mins
+## Time difference of 2.868 mins
 ```
 
 
 Here's an example of the selected runners drawn from a random simulated lottery.
 
 ```r
-i <- sample(c(1, size), 1)
-sort(lottery[i, ])
+i <- sample(seq(1, size), 1)
+sampLottery <- list(i, sort(lottery[i, ]))
+names(sampLottery) <- c("lottery", "runner")
+sampLottery
 ```
 
 ```
-##   [1]    2    4    6   10   15   17   18   26   28   31   37   39   43   56
-##  [15]   58   60   61   64   67   68   69   71   72   79   80   81   86   87
-##  [29]   92   95  100  102  103  108  114  115  116  118  123  125  129  130
-##  [43]  134  139  150  155  157  160  165  166  167  176  178  180  185  191
-##  [57]  193  195  200  206  208  217  218  220  231  235  239  241  242  243
-##  [71]  245  248  256  258  260  264  265  269  287  288  289  291  295  296
-##  [85]  303  308  309  316  317  321  324  325  326  328  334  340  357  363
-##  [99]  379  382  383  390  391  402  403  404  411  414  423  424  432  438
-## [113]  440  446  447  467  473  482  488  492  502  507  509  514  515  519
-## [127]  521  528  541  573  595  612  613  616  617  618  642  645  665  669
-## [141]  680  681  696  701  703  712  717  719  720  722  725  730  732  738
-## [155]  747  761  767  783  795  808  826  843  849  854  866  878  881  883
-## [169]  884  896  901  921  924  925  929  938  946  969  990  994 1013 1024
-## [183] 1046 1061 1068 1098 1111 1121 1148 1183 1230 1238 1269 1289 1302 1303
-## [197] 1311 1336 1369 1397 1418 1420 1467 1494 1495 1529 1536 1542 1544 1571
-## [211] 1577 1578 1582 1605 1608 1636 1646 1661 1670 1691 1699 1700 1712 1721
-## [225] 1743 1760 1762 1778 1781 1812 1815 1816 1829 1837 1896 1905 1911 1914
-## [239] 1931 1942 1943 1954 1977 2004 2021 2024 2026 2046 2047 2057 2064 2069
-## [253] 2073 2092 2097 2102 2111 2136 2142 2144 2159 2170 2171 2176 2177 2231
-## [267] 2265 2269 2278 2296
+## $lottery
+## [1] 782
+## 
+## $runner
+##   [1]    2    5    7   11   14   18   25   30   31   32   33   39   40   42
+##  [15]   48   49   53   63   78   80   84   86   89   97  100  101  107  109
+##  [29]  114  115  116  117  120  123  127  133  135  144  147  152  153  157
+##  [43]  164  167  168  173  178  186  192  193  196  202  212  217  219  220
+##  [57]  223  226  230  231  247  248  249  257  262  265  266  269  272  277
+##  [71]  280  289  290  291  293  294  297  303  308  319  325  336  340  343
+##  [85]  356  358  372  380  381  387  389  406  417  422  424  433  434  469
+##  [99]  471  480  492  493  510  517  518  523  533  542  548  552  553  554
+## [113]  580  588  599  610  616  623  661  668  685  688  690  696  705  709
+## [127]  711  720  728  731  739  747  755  757  763  765  766  796  801  804
+## [141]  832  846  850  862  870  874  878  885  899  901  907  968  973  979
+## [155]  983  992  997 1000 1021 1037 1059 1061 1074 1090 1106 1111 1112 1122
+## [169] 1149 1154 1159 1164 1170 1204 1230 1251 1252 1262 1270 1274 1311 1313
+## [183] 1317 1323 1330 1337 1349 1400 1405 1419 1440 1447 1455 1457 1459 1478
+## [197] 1480 1484 1493 1499 1515 1525 1532 1546 1553 1554 1577 1580 1584 1592
+## [211] 1593 1600 1603 1630 1681 1693 1695 1696 1699 1718 1730 1751 1770 1794
+## [225] 1807 1849 1855 1861 1862 1863 1868 1883 1887 1892 1896 1915 1929 1936
+## [239] 1940 1945 1969 1974 1977 1978 1981 1985 1995 1999 2005 2058 2072 2083
+## [253] 2115 2125 2134 2137 2140 2156 2162 2175 2196 2198 2203 2213 2224 2263
+## [267] 2270 2272 2275 2286
 ```
 
 
@@ -173,7 +179,7 @@ for (i in 1:size) {
 }
 ```
 
-Reformat the `distn` matrix to an aggregated data frame for analysis.
+Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 
 ```r
 tickets <- factor(as.vector(t(lottery2)))
@@ -194,35 +200,58 @@ dfSummary$prob <- 100 * (dfSummary$freq/total)
 avg <- aggregate(prob ~ tickets, dfSummary, mean)
 med <- aggregate(prob ~ tickets, dfSummary, median)
 sd <- aggregate(prob ~ tickets, dfSummary, sd)
-simsum <- data.frame(avg, med[, 2], sd[, 2])
-names(simsum) <- c("tickets", "mean", "median", "sd")
+comparison <- c(7.6, 14.6, 21.1, 27.1)
+simsum <- data.frame(comparison, avg, med[, 2], sd[, 2], n, n * avg[, 2]/100)
+names(simsum) <- c("Comparison", "Tickets", "Mean", "Median", "SD", "N", "Expected")
 print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
-<!-- Tue Dec 04 13:29:23 2012 -->
+<!-- Tue Dec 04 15:21:03 2012 -->
 <TABLE border=1>
-<TR> <TH> tickets </TH> <TH> mean </TH> <TH> median </TH> <TH> sd </TH>  </TR>
-  <TR> <TD> 1 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 0.50 </TD> </TR>
-  <TR> <TD> 2 </TD> <TD align="right"> 15.14 </TD> <TD align="right"> 15.15 </TD> <TD align="right"> 1.40 </TD> </TR>
-  <TR> <TD> 3 </TD> <TD align="right"> 21.77 </TD> <TD align="right"> 21.74 </TD> <TD align="right"> 2.53 </TD> </TR>
-  <TR> <TD> 4 </TD> <TD align="right"> 28.05 </TD> <TD align="right"> 27.87 </TD> <TD align="right"> 3.96 </TD> </TR>
+<TR> <TH> Comparison </TH> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> Expected </TH>  </TR>
+  <TR> <TD align="right"> 7.60 </TD> <TD> 1 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 0.50 </TD> <TD align="right"> 1491.00 </TD> <TD align="right"> 117.74 </TD> </TR>
+  <TR> <TD align="right"> 14.60 </TD> <TD> 2 </TD> <TD align="right"> 15.14 </TD> <TD align="right"> 15.15 </TD> <TD align="right"> 1.40 </TD> <TD align="right"> 482.00 </TD> <TD align="right"> 72.99 </TD> </TR>
+  <TR> <TD align="right"> 21.10 </TD> <TD> 3 </TD> <TD align="right"> 21.77 </TD> <TD align="right"> 21.74 </TD> <TD align="right"> 2.53 </TD> <TD align="right"> 207.00 </TD> <TD align="right"> 45.05 </TD> </TR>
+  <TR> <TD align="right"> 27.10 </TD> <TD> 4 </TD> <TD align="right"> 28.05 </TD> <TD align="right"> 27.87 </TD> <TD align="right"> 3.96 </TD> <TD align="right"> 122.00 </TD> <TD align="right"> 34.22 </TD> </TR>
    </TABLE>
 
-Plot the distribution of probabilities from the `1000` simulated lotteries.
+Plot the distribution of probabilities from the `1000` simulated lotteries. Annotate with the estimated mean selection probability.
 
 ```r
+y1 <- max(density(dfSummary$prob[dfSummary$tickets == 1])$y)
+y2 <- max(density(dfSummary$prob[dfSummary$tickets == 2])$y)
+y3 <- max(density(dfSummary$prob[dfSummary$tickets == 3])$y)
+y4 <- max(density(dfSummary$prob[dfSummary$tickets == 4])$y)
+y <- c(y1, y2, y3, y4)
 ggplot(dfSummary, aes(x = prob, y = ..density.., fill = tickets)) + geom_density(alpha = 1/2, 
-    color = NA) + scale_fill_brewer(type = "div", palette = "BrBG") + scale_x_continuous(limits = c(0, 
-    max(dfSummary$prob))) + labs(title = "2012 WSER Lottery Selection Probability Densities", 
-    x = "%", y = paste("Proportion of", size, "simulations"), fill = "Tickets") + 
-    annotate("text", label = format(avg[, 2], digits = 2, trim = TRUE), x = avg[, 
-        2], y = c(0.84, 0.3, 0.2, 0.13)) + theme(legend.position = "bottom")
+    color = NA) + scale_fill_brewer(type = "div", palette = "BrBG") + labs(title = "2012 WSER Lottery Selection Probability Densities", 
+    x = "Percent", y = paste("Proportion of", size, "simulations"), fill = "Tickets") + 
+    annotate("text", label = format(simsum$Mean, digits = 2, trim = TRUE), x = simsum$Mean, 
+        y = y) + theme(legend.position = "bottom")
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities.png) 
 
-As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$).
+As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$). Also, the selection probabilities I estimated from simulation are **slightly higher** than the probabilities on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details) but **within 1 SD**.
+
+Another way to think about the lottery is to plot the distribution of the frequency of runners selected by number of tickets. Annotate with the estimated expected value.
+
+```r
+y1 <- max(density(dfSummary$freq[dfSummary$tickets == 1])$y)
+y2 <- max(density(dfSummary$freq[dfSummary$tickets == 2])$y)
+y3 <- max(density(dfSummary$freq[dfSummary$tickets == 3])$y)
+y4 <- max(density(dfSummary$freq[dfSummary$tickets == 4])$y)
+y <- c(y1, y2, y3, y4)
+ggplot(dfSummary, aes(x = freq, y = ..density.., fill = tickets)) + geom_density(alpha = 1/2, 
+    color = NA) + scale_fill_brewer(type = "div", palette = "BrBG") + labs(title = "2012 WSER Lottery Selection Frequency Densities", 
+    x = "Number", y = paste("Proportion of", size, "simulations"), fill = "Tickets") + 
+    annotate("text", label = format(simsum$Expected, digits = 3, trim = TRUE), 
+        x = simsum$Expected, y = y) + theme(legend.position = "bottom")
+```
+
+![plot of chunk PlotFrequencies](figure/PlotFrequencies.png) 
+
 
 Plot the results of all the simulated lotteries.
 
@@ -234,5 +263,5 @@ ggplot(dfSummary, aes(x = sim, y = freq, fill = tickets)) + geom_area(stat = "id
     coord_flip()
 ```
 
-![plot of chunk PlotLotteries](figure/PlotLotteries.png) 
+![plot of chunk PlotLotteryResults](figure/PlotLotteryResults.png) 
 

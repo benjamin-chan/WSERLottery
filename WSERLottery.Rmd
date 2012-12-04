@@ -88,8 +88,10 @@ end - start
 
 Here's an example of the selected runners drawn from a random simulated lottery.
 ```{r RandomLotteryResult}
-i <- sample(c(1, size), 1)
-sort(lottery[i, ])
+i <- sample(seq(1, size), 1)
+sampLottery <- list(i, sort(lottery[i, ]))
+names(sampLottery) <- c("lottery", "runner")
+sampLottery
 ```
 
 
@@ -104,7 +106,7 @@ for (i in 1:size) {
   lottery2[i, ] <- dfHat0$tickets[lottery[i, ]]
 }
 ```
-Reformat the `distn` matrix to an aggregated data frame for analysis.
+Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 ```{r ReformatMatrix}
 tickets <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
@@ -122,24 +124,44 @@ dfSummary$prob <- 100 * (dfSummary$freq / total)
 avg <- aggregate(prob ~ tickets, dfSummary, mean)
 med <- aggregate(prob ~ tickets, dfSummary, median)
 sd  <- aggregate(prob ~ tickets, dfSummary, sd)
-simsum <- data.frame(avg, med[, 2], sd[, 2])
-names(simsum) <- c("tickets", "mean", "median", "sd")
+comparison <- c(7.6, 14.6, 21.1, 27.1)
+simsum <- data.frame(comparison, avg, med[, 2], sd[, 2], n, n * avg[, 2] / 100)
+names(simsum) <- c("Comparison", "Tickets", "Mean", "Median", "SD", "N", "Expected")
 print(xtable(simsum), type="html", include.rownames=FALSE)
 ```
-Plot the distribution of probabilities from the `r size` simulated lotteries.
+Plot the distribution of probabilities from the `r size` simulated lotteries. Annotate with the estimated mean selection probability.
 ```{r PlotProbabilities}
+y1 <- max(density(dfSummary$prob[dfSummary$tickets == 1])$y)
+y2 <- max(density(dfSummary$prob[dfSummary$tickets == 2])$y)
+y3 <- max(density(dfSummary$prob[dfSummary$tickets == 3])$y)
+y4 <- max(density(dfSummary$prob[dfSummary$tickets == 4])$y)
+y <- c(y1, y2, y3, y4)
 ggplot(dfSummary, aes(x=prob, y=..density.., fill=tickets)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(type="div", palette="BrBG") +
-  scale_x_continuous(limits=c(0, max(dfSummary$prob))) +
-  labs(title="2012 WSER Lottery Selection Probability Densities", x="%", y=paste("Proportion of", size, "simulations"), fill="Tickets") +
-  annotate("text", label=format(avg[, 2], digits=2, trim=TRUE), x=avg[, 2], y=c(0.84, 0.3, 0.2, 0.13)) +
+  labs(title="2012 WSER Lottery Selection Probability Densities", x="Percent", y=paste("Proportion of", size, "simulations"), fill="Tickets") +
+  annotate("text", label=format(simsum$Mean, digits=2, trim=TRUE), x=simsum$Mean, y=y) +
   theme(legend.position="bottom")
 ```
-As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$).
+As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$). Also, the selection probabilities I estimated from simulation are **slightly higher** than the probabilities on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details) but **within 1 SD**.
+
+Another way to think about the lottery is to plot the distribution of the frequency of runners selected by number of tickets. Annotate with the estimated expected value.
+```{r PlotFrequencies}
+y1 <- max(density(dfSummary$freq[dfSummary$tickets == 1])$y)
+y2 <- max(density(dfSummary$freq[dfSummary$tickets == 2])$y)
+y3 <- max(density(dfSummary$freq[dfSummary$tickets == 3])$y)
+y4 <- max(density(dfSummary$freq[dfSummary$tickets == 4])$y)
+y <- c(y1, y2, y3, y4)
+ggplot(dfSummary, aes(x=freq, y=..density.., fill=tickets)) +
+  geom_density(alpha=1/2, color=NA) +
+  scale_fill_brewer(type="div", palette="BrBG") +
+  labs(title="2012 WSER Lottery Selection Frequency Densities", x="Number", y=paste("Proportion of", size, "simulations"), fill="Tickets") +
+  annotate("text", label=format(simsum$Expected, digits=3, trim=TRUE), x=simsum$Expected, y=y) +
+  theme(legend.position="bottom")
+```
 
 Plot the results of all the simulated lotteries.
-```{r PlotLotteries, fig.height=20}
+```{r PlotLotteryResults, fig.height=20}
 ggplot(dfSummary, aes(x=sim, y=freq, fill=tickets)) +
   geom_area(stat="identity") +
   scale_fill_brewer(type="div", palette="BrBG") +
