@@ -1,5 +1,7 @@
-Western States Endurance Run Lottery
-====================================
+2013 Western States Endurance Run Lottery
+=========================================
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-04 13:26:26` using `R version 2.15.2 (2012-10-26)`.
+
 I was a little intrigued by how the Western States Endurance Run (WSER) calculated their lottery odds estimates. Their estimates can be found on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details).
 
 > As posted on the lottery applicant page, we have 2302 total lottery applicants for the 2013 race.
@@ -26,13 +28,17 @@ I was a little intrigued by how the Western States Endurance Run (WSER) calculat
 >
 > $E(X) = \sum X P(X)$. What this is saying (in English) is "The expected value is the sum of all the gains multiplied by their individual probabilities."
 
-First, what are labeled as *odds* appears to really be *probabilities*. Second, the sum of those probabilities do not add up to 1.
+First, what are labeled as *odds* appear to really be *probabilities*. Second, it is unclear how the equation for expected value was used to calculate these  probabilities.
 
 At first, I suspected the reason might be the automatic spots. But the text of the lottery process above is clear that the 270 runners that will be drawn will be solely from the lottery applicants and will not include the automatic spots.
 
-Here, I run a simulation of the lottery process to estimate probabilities of winning a slot for the Western States Endurance Run. The simulation accounts for the changing probability distribution of the lottery hat as runners are selected. Once a runner is selected, their tickets are withdrawn from the hat.
-
-I'll use `R version 2.15.2 (2012-10-26)`. This code was run on `2012-12-04 12:16:59`.
+Here, I run a simulation of the lottery process to estimate probabilities of winning a slot for the Western States Endurance Run. The simulation does a few things
+* Accounts for the changing probability distribution of the lottery hat as runners are selected
+* Once a runner is selected, their tickets are withdrawn from the hat
+* For each simulated lottery, the distribution of selected 1-ticket, 2-ticket, 3-ticket, and 4-ticket runners is determined
+* From this distributions of the simulated lotteries, the estimated selection probabilities are characterized
+* Selection probability distributions are plotted
+* Selection distributions from the simulated lotteries are also plotted
 
 Load the required packages.
 
@@ -118,7 +124,7 @@ end - start
 ```
 
 ```
-## Time difference of 2.884 mins
+## Time difference of 2.9 mins
 ```
 
 
@@ -194,7 +200,7 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
-<!-- Tue Dec 04 12:19:54 2012 -->
+<!-- Tue Dec 04 13:29:23 2012 -->
 <TABLE border=1>
 <TR> <TH> tickets </TH> <TH> mean </TH> <TH> median </TH> <TH> sd </TH>  </TR>
   <TR> <TD> 1 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 0.50 </TD> </TR>
@@ -208,7 +214,7 @@ Plot the distribution of probabilities from the `1000` simulated lotteries.
 ```r
 ggplot(dfSummary, aes(x = prob, y = ..density.., fill = tickets)) + geom_density(alpha = 1/2, 
     color = NA) + scale_fill_brewer(type = "div", palette = "BrBG") + scale_x_continuous(limits = c(0, 
-    max(dfSummary$prob))) + labs(title = "2012 WSER Lottery Probability Densities", 
+    max(dfSummary$prob))) + labs(title = "2012 WSER Lottery Selection Probability Densities", 
     x = "%", y = paste("Proportion of", size, "simulations"), fill = "Tickets") + 
     annotate("text", label = format(avg[, 2], digits = 2, trim = TRUE), x = avg[, 
         2], y = c(0.84, 0.3, 0.2, 0.13)) + theme(legend.position = "bottom")
@@ -218,7 +224,7 @@ ggplot(dfSummary, aes(x = prob, y = ..density.., fill = tickets)) + geom_density
 
 As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$).
 
-Plot the results of all the simulated lotteries. **Need to reorder so the relationships are easier to digest**
+Plot the results of all the simulated lotteries.
 
 ```r
 ggplot(dfSummary, aes(x = sim, y = freq, fill = tickets)) + geom_area(stat = "identity") + 
