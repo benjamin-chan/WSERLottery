@@ -124,11 +124,17 @@ dfSummary$prob <- 100 * (dfSummary$freq / total)
 avg <- aggregate(prob ~ tickets, dfSummary, mean)
 med <- aggregate(prob ~ tickets, dfSummary, median)
 sd  <- aggregate(prob ~ tickets, dfSummary, sd)
-comparison <- c(7.6, 14.6, 21.1, 27.1)
-simsum <- data.frame(comparison, avg, med[, 2], sd[, 2], n, n * avg[, 2] / 100)
-names(simsum) <- c("Comparison", "Tickets", "Mean", "Median", "SD", "N", "Expected")
+ev <- n * avg[, 2] / 100
+probWSER <- c(7.6, 14.6, 21.1, 27.1)
+evWSER <- n * probWSER / 100
+diffprob <- avg[, 2] - probWSER
+diffev <- ev - evWSER
+simsum <- data.frame(avg, med[, 2], sd[, 2], n, ev, probWSER, evWSER, diffprob, diffev)
+names(simsum) <- c("Tickets", "Mean", "Median", "SD", "N", "Expected", "Prob (WSER)", "Expected (WSER)", "Difference, prob.", "Difference, expected")
 print(xtable(simsum), type="html", include.rownames=FALSE)
 ```
+Curiously, the probabilities given in the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details) would yield only `r sum(evWSER)` lottery winners, while my estimates would yield `r sum(ev)` lottery winners, the target number. **Either something might be incorrect about my thinking about the process of the lottery, or something might be incorrect with the calculation of the probability estimates by WSER.**
+
 Plot the distribution of probabilities from the `r size` simulated lotteries. Annotate with the estimated mean selection probability.
 ```{r PlotProbabilities}
 y1 <- max(density(dfSummary$prob[dfSummary$tickets == 1])$y)
@@ -140,10 +146,10 @@ ggplot(dfSummary, aes(x=prob, y=..density.., fill=tickets)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(type="div", palette="BrBG") +
   labs(title="2012 WSER Lottery Selection Probability Densities", x="Percent", y=paste("Proportion of", size, "simulations"), fill="Tickets") +
-  annotate("text", label=format(simsum$Mean, digits=2, trim=TRUE), x=simsum$Mean, y=y) +
+  annotate("text", label=paste(format(simsum$Mean, digits=2, trim=TRUE), "%", sep=""), x=simsum$Mean, y=y) +
   theme(legend.position="bottom")
 ```
-As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$). Also, the selection probabilities I estimated from simulation are **slightly higher** than the probabilities on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details) but **within 1 SD**.
+As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$). Also, the selection probabilities I estimated from simulation are **uniformly slightly higher** than the probabilities on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details). However, although the WSER estimates are **within 1 SD** of my estimates, the consequence of the apparently systematic bias is the **`r sum(diffev)` more runners selected** as shown in the table.
 
 Another way to think about the lottery is to plot the distribution of the frequency of runners selected by number of tickets. Annotate with the estimated expected value.
 ```{r PlotFrequencies}
@@ -160,13 +166,16 @@ ggplot(dfSummary, aes(x=freq, y=..density.., fill=tickets)) +
   theme(legend.position="bottom")
 ```
 
-Plot the results of all the simulated lotteries.
-```{r PlotLotteryResults, fig.height=20}
-ggplot(dfSummary, aes(x=sim, y=freq, fill=tickets)) +
-  geom_area(stat="identity") +
+Plot the results of a random sample of the `r size` simulated lotteries.
+```{r PlotLotteryResults, fig.height=15}
+s <- 100
+i <- sample(seq(1, size), s)
+dfSample <- dfLottery[dfLottery$sim %in% i, ]
+dfSample$sim <- factor(dfSample$sim)
+ggplot(dfSample, aes(x=sim, fill=tickets)) +
+  geom_bar(width=1) +
   scale_fill_brewer(type="div", palette="BrBG") +
-  scale_x_reverse() +
-  labs(title=paste(size, "Simulated 2012 WSER Lotteries"), x="Simulation", y="Number of selected runners", fill="Tickets") +
-  theme(legend.position="top") +
-  coord_flip()
+  labs(title=paste("Simulated 2012 WSER Lotteries\n", "Sample of", s, "Lotteries"), x="Simulated lottery", y="Number of selected runners", fill="Tickets") +
+  coord_flip() +
+  theme(legend.position="top")
 ```

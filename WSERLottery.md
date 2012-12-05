@@ -1,6 +1,6 @@
 2013 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-04 15:18:08` using `R version 2.15.2 (2012-10-26)`.
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-05 11:01:11` using `R version 2.15.2 (2012-10-26)`.
 
 I was a little intrigued by how the Western States Endurance Run (WSER) calculated their lottery odds estimates. Their estimates can be found on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details).
 
@@ -124,7 +124,7 @@ end - start
 ```
 
 ```
-## Time difference of 2.868 mins
+## Time difference of 2.869 mins
 ```
 
 
@@ -200,21 +200,29 @@ dfSummary$prob <- 100 * (dfSummary$freq/total)
 avg <- aggregate(prob ~ tickets, dfSummary, mean)
 med <- aggregate(prob ~ tickets, dfSummary, median)
 sd <- aggregate(prob ~ tickets, dfSummary, sd)
-comparison <- c(7.6, 14.6, 21.1, 27.1)
-simsum <- data.frame(comparison, avg, med[, 2], sd[, 2], n, n * avg[, 2]/100)
-names(simsum) <- c("Comparison", "Tickets", "Mean", "Median", "SD", "N", "Expected")
+ev <- n * avg[, 2]/100
+probWSER <- c(7.6, 14.6, 21.1, 27.1)
+evWSER <- n * probWSER/100
+diffprob <- avg[, 2] - probWSER
+diffev <- ev - evWSER
+simsum <- data.frame(avg, med[, 2], sd[, 2], n, ev, probWSER, evWSER, diffprob, 
+    diffev)
+names(simsum) <- c("Tickets", "Mean", "Median", "SD", "N", "Expected", "Prob (WSER)", 
+    "Expected (WSER)", "Difference, prob.", "Difference, expected")
 print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
-<!-- Tue Dec 04 15:21:03 2012 -->
+<!-- Wed Dec 05 11:04:06 2012 -->
 <TABLE border=1>
-<TR> <TH> Comparison </TH> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> Expected </TH>  </TR>
-  <TR> <TD align="right"> 7.60 </TD> <TD> 1 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 0.50 </TD> <TD align="right"> 1491.00 </TD> <TD align="right"> 117.74 </TD> </TR>
-  <TR> <TD align="right"> 14.60 </TD> <TD> 2 </TD> <TD align="right"> 15.14 </TD> <TD align="right"> 15.15 </TD> <TD align="right"> 1.40 </TD> <TD align="right"> 482.00 </TD> <TD align="right"> 72.99 </TD> </TR>
-  <TR> <TD align="right"> 21.10 </TD> <TD> 3 </TD> <TD align="right"> 21.77 </TD> <TD align="right"> 21.74 </TD> <TD align="right"> 2.53 </TD> <TD align="right"> 207.00 </TD> <TD align="right"> 45.05 </TD> </TR>
-  <TR> <TD align="right"> 27.10 </TD> <TD> 4 </TD> <TD align="right"> 28.05 </TD> <TD align="right"> 27.87 </TD> <TD align="right"> 3.96 </TD> <TD align="right"> 122.00 </TD> <TD align="right"> 34.22 </TD> </TR>
+<TR> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> Expected </TH> <TH> Prob (WSER) </TH> <TH> Expected (WSER) </TH> <TH> Difference, prob. </TH> <TH> Difference, expected </TH>  </TR>
+  <TR> <TD> 1 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 0.50 </TD> <TD align="right"> 1491.00 </TD> <TD align="right"> 117.74 </TD> <TD align="right"> 7.60 </TD> <TD align="right"> 113.32 </TD> <TD align="right"> 0.30 </TD> <TD align="right"> 4.42 </TD> </TR>
+  <TR> <TD> 2 </TD> <TD align="right"> 15.14 </TD> <TD align="right"> 15.15 </TD> <TD align="right"> 1.40 </TD> <TD align="right"> 482.00 </TD> <TD align="right"> 72.99 </TD> <TD align="right"> 14.60 </TD> <TD align="right"> 70.37 </TD> <TD align="right"> 0.54 </TD> <TD align="right"> 2.61 </TD> </TR>
+  <TR> <TD> 3 </TD> <TD align="right"> 21.77 </TD> <TD align="right"> 21.74 </TD> <TD align="right"> 2.53 </TD> <TD align="right"> 207.00 </TD> <TD align="right"> 45.05 </TD> <TD align="right"> 21.10 </TD> <TD align="right"> 43.68 </TD> <TD align="right"> 0.67 </TD> <TD align="right"> 1.38 </TD> </TR>
+  <TR> <TD> 4 </TD> <TD align="right"> 28.05 </TD> <TD align="right"> 27.87 </TD> <TD align="right"> 3.96 </TD> <TD align="right"> 122.00 </TD> <TD align="right"> 34.22 </TD> <TD align="right"> 27.10 </TD> <TD align="right"> 33.06 </TD> <TD align="right"> 0.95 </TD> <TD align="right"> 1.16 </TD> </TR>
    </TABLE>
+
+Curiously, the probabilities given in the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details) would yield only `260.427` lottery winners, while my estimates would yield `270` lottery winners, the target number. **Either something might be incorrect about my thinking about the process of the lottery, or something might be incorrect with the calculation of the probability estimates by WSER.**
 
 Plot the distribution of probabilities from the `1000` simulated lotteries. Annotate with the estimated mean selection probability.
 
@@ -227,13 +235,13 @@ y <- c(y1, y2, y3, y4)
 ggplot(dfSummary, aes(x = prob, y = ..density.., fill = tickets)) + geom_density(alpha = 1/2, 
     color = NA) + scale_fill_brewer(type = "div", palette = "BrBG") + labs(title = "2012 WSER Lottery Selection Probability Densities", 
     x = "Percent", y = paste("Proportion of", size, "simulations"), fill = "Tickets") + 
-    annotate("text", label = format(simsum$Mean, digits = 2, trim = TRUE), x = simsum$Mean, 
-        y = y) + theme(legend.position = "bottom")
+    annotate("text", label = paste(format(simsum$Mean, digits = 2, trim = TRUE), 
+        "%", sep = ""), x = simsum$Mean, y = y) + theme(legend.position = "bottom")
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities.png) 
 
-As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$). Also, the selection probabilities I estimated from simulation are **slightly higher** than the probabilities on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details) but **within 1 SD**.
+As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$). Also, the selection probabilities I estimated from simulation are **uniformly slightly higher** than the probabilities on the [WSER website](http://www.wser.org/2012/12/03/dec-8-lottery-details). However, although the WSER estimates are **within 1 SD** of my estimates, the consequence of the apparently systematic bias is the **`9.573` more runners selected** as shown in the table.
 
 Another way to think about the lottery is to plot the distribution of the frequency of runners selected by number of tickets. Annotate with the estimated expected value.
 
@@ -253,14 +261,17 @@ ggplot(dfSummary, aes(x = freq, y = ..density.., fill = tickets)) + geom_density
 ![plot of chunk PlotFrequencies](figure/PlotFrequencies.png) 
 
 
-Plot the results of all the simulated lotteries.
+Plot the results of a random sample of the `1000` simulated lotteries.
 
 ```r
-ggplot(dfSummary, aes(x = sim, y = freq, fill = tickets)) + geom_area(stat = "identity") + 
-    scale_fill_brewer(type = "div", palette = "BrBG") + scale_x_reverse() + 
-    labs(title = paste(size, "Simulated 2012 WSER Lotteries"), x = "Simulation", 
-        y = "Number of selected runners", fill = "Tickets") + theme(legend.position = "top") + 
-    coord_flip()
+s <- 100
+i <- sample(seq(1, size), s)
+dfSample <- dfLottery[dfLottery$sim %in% i, ]
+dfSample$sim <- factor(dfSample$sim)
+ggplot(dfSample, aes(x = sim, fill = tickets)) + geom_bar(width = 1) + scale_fill_brewer(type = "div", 
+    palette = "BrBG") + labs(title = paste("Simulated 2012 WSER Lotteries\n", 
+    "Sample of", s, "Lotteries"), x = "Simulated lottery", y = "Number of selected runners", 
+    fill = "Tickets") + coord_flip() + theme(legend.position = "top")
 ```
 
 ![plot of chunk PlotLotteryResults](figure/PlotLotteryResults.png) 
