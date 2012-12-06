@@ -86,7 +86,17 @@ sampLottery <- list(i, sort(lottery[i, ]))
 names(sampLottery) <- c("lottery", "runner")
 sampLottery
 ```
+Here's the distribution of the category of ticket holders from that random simulated lottery.
+```{r RandomLotteryDistn}
+table(dfHat$tickets[sampLottery$runner])
+```
+I.e., in simulated lottery `r i`, 
+* `r sum(dfHat$tickets[sampLottery$runner] == 1)` applicants with 1 ticket were selected  (`r format(100 * sum(dfHat$tickets[sampLottery$runner] == 1) / distn[1], digits=2)`%)
+* `r sum(dfHat$tickets[sampLottery$runner] == 2)` applicants with 2 tickets were selected (`r format(100 * sum(dfHat$tickets[sampLottery$runner] == 2) / distn[2], digits=2)`%)
+* `r sum(dfHat$tickets[sampLottery$runner] == 3)` applicants with 3 tickets were selected (`r format(100 * sum(dfHat$tickets[sampLottery$runner] == 3) / distn[3], digits=2)`%)
+* `r sum(dfHat$tickets[sampLottery$runner] == 4)` applicants with 4 tickets were selected (`r format(100 * sum(dfHat$tickets[sampLottery$runner] == 4) / distn[4], digits=2)`%)
 
+Okay... but what happened with the other `r size - 1` simulated lotteries?
 
 Format lottery simulation data
 ------------------------------
@@ -101,6 +111,7 @@ for (i in 1:size) {
 ```
 Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 ```{r ReformatMatrix}
+start <- Sys.time()
 tickets <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
 dfLottery <- data.frame(sim, tickets)
@@ -109,6 +120,8 @@ sim <- rep(seq(1, size), each=4)
 tickets <- factor(rep(seq(1, 4), size))
 freq <- as.vector(t(aggLottery$tickets))
 dfSummary <- data.frame(sim, tickets, freq)
+end <- Sys.time()
+end - start
 ```
 For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the proportion of selected applicants. 
 ```{r Probabilities}
@@ -166,7 +179,7 @@ print(xtable(simsum), type="html", include.rownames=FALSE)
 ```
 My estimates and the probabilities calculated by WSER are essentially identical. Percent difference is never more than `r max(abs(simsum$"% diff."))`%.
 
-Plot the outcomes of a random sample of the `r format(size, big.mark=",")` simulated lotteries.
+Plot the outcomes of a random sample of the `r format(size, big.mark=",")` simulated lotteries as a [waffle plot](http://www.improving-visualisation.org/vis/id=179). The width of each bar represents the number of selected runners. Blocks represent 10 runners.
 ```{r PlotLotteryResults, fig.height=15}
 s <- 100
 i <- sample(seq(1, size), s)
@@ -175,7 +188,10 @@ dfSample$sim <- factor(dfSample$sim)
 levels(dfSample$sim) <- rev(levels(dfSample$sim))
 ggplot(dfSample, aes(x=sim, fill=tickets)) +
   geom_bar(width=1) +
+  geom_hline(y=seq(0, spots, 10), color="white") +
+  geom_vline(x=seq(1, s)-0.5, color="white") +
   scale_fill_brewer(type="div", palette="BrBG") +
+  scale_y_continuous(expand=c(0, 0)) +
   labs(title=paste("Simulated 2012 WSER Lotteries\n", "Sample of", s, "Lotteries"), x="Simulated lottery", y="Number of selected runners", fill="Tickets") +
   coord_flip() +
   theme(legend.position="top")

@@ -1,6 +1,6 @@
 2013 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-05 20:07:18` using `R version 2.15.2 (2012-10-26)`.
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-06 10:50:27` using `R version 2.15.2 (2012-10-26)`.
 
 I was a little intrigued by how the Western States Endurance Run (WSER) calculated their lottery odds estimates. Their estimates can be found in the WSER 2012 [lottery details](http://www.wser.org/2012/12/03/dec-8-lottery-details).
 
@@ -117,7 +117,7 @@ end - start
 ```
 
 ```
-## Time difference of 1.098 mins
+## Time difference of 6.693 secs
 ```
 
 
@@ -157,7 +157,25 @@ sampLottery
 ## [267] 2231 2240 2250 2281
 ```
 
+Here's the distribution of the category of ticket holders from that random simulated lottery.
 
+```r
+table(dfHat$tickets[sampLottery$runner])
+```
+
+```
+## 
+##   1   2   3   4 
+## 120  70  44  36
+```
+
+I.e., in simulated lottery `9294`, 
+* `120` applicants with 1 ticket were selected  (`8.1`%)
+* `70` applicants with 2 tickets were selected (`15`%)
+* `44` applicants with 3 tickets were selected (`21`%)
+* `36` applicants with 4 tickets were selected (`30`%)
+
+Okay... but what happened with the other `9999` simulated lotteries?
 
 Format lottery simulation data
 ------------------------------
@@ -175,6 +193,7 @@ for (i in 1:size) {
 Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 
 ```r
+start <- Sys.time()
 tickets <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each = spots)
 dfLottery <- data.frame(sim, tickets)
@@ -183,6 +202,12 @@ sim <- rep(seq(1, size), each = 4)
 tickets <- factor(rep(seq(1, 4), size))
 freq <- as.vector(t(aggLottery$tickets))
 dfSummary <- data.frame(sim, tickets, freq)
+end <- Sys.time()
+end - start
+```
+
+```
+## Time difference of 13.8 secs
 ```
 
 For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the proportion of selected applicants. 
@@ -252,7 +277,7 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
-<!-- Wed Dec  5 20:10:20 2012 -->
+<!-- Thu Dec 06 10:50:50 2012 -->
 <TABLE border=1>
 <TR> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> EV </TH> <TH> Prob (WSER) </TH> <TH> EV (WSER) </TH> <TH> Diff. prob. </TH> <TH> Diff. EV </TH> <TH> % diff. </TH>  </TR>
   <TR> <TD> 1 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 7.87 </TD> <TD align="right"> 0.51 </TD> <TD align="right"> 1486.00 </TD> <TD align="right"> 117.47 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 117.39 </TD> <TD align="right"> 0.01 </TD> <TD align="right"> 0.08 </TD> <TD align="right"> 0.07 </TD> </TR>
@@ -263,7 +288,7 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 
 My estimates and the probabilities calculated by WSER are essentially identical. Percent difference is never more than `0.2913`%.
 
-Plot the outcomes of a random sample of the `10,000` simulated lotteries.
+Plot the outcomes of a random sample of the `10,000` simulated lotteries as a [waffle plot](http://www.improving-visualisation.org/vis/id=179). The width of each bar represents the number of selected runners. Blocks represent 10 runners.
 
 ```r
 s <- 100
@@ -271,9 +296,11 @@ i <- sample(seq(1, size), s)
 dfSample <- dfLottery[dfLottery$sim %in% i, ]
 dfSample$sim <- factor(dfSample$sim)
 levels(dfSample$sim) <- rev(levels(dfSample$sim))
-ggplot(dfSample, aes(x = sim, fill = tickets)) + geom_bar(width = 1) + scale_fill_brewer(type = "div", 
-    palette = "BrBG") + labs(title = paste("Simulated 2012 WSER Lotteries\n", 
-    "Sample of", s, "Lotteries"), x = "Simulated lottery", y = "Number of selected runners", 
+ggplot(dfSample, aes(x = sim, fill = tickets)) + geom_bar(width = 1) + geom_hline(y = seq(0, 
+    spots, 10), color = "white") + geom_vline(x = seq(1, s) - 0.5, color = "white") + 
+    scale_fill_brewer(type = "div", palette = "BrBG") + scale_y_continuous(expand = c(0, 
+    0)) + labs(title = paste("Simulated 2012 WSER Lotteries\n", "Sample of", 
+    s, "Lotteries"), x = "Simulated lottery", y = "Number of selected runners", 
     fill = "Tickets") + coord_flip() + theme(legend.position = "top")
 ```
 
