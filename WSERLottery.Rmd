@@ -54,11 +54,11 @@ distn <- c(1486, 480, 207, 122)
 applicants <- sum(distn)
 runner <- seq(1, applicants)
 tickets <- c(rep(4, distn[4]), rep(3, distn[3]), rep(2, distn[2]), rep(1, distn[1]))
-dfHat0 <- data.frame(runner, tickets)
-dfHat0$prob <- dfHat0$tickets / sum(dfHat0$tickets)
-table(factor(dfHat0$tickets))
-head(dfHat0)
-tail(dfHat0)
+dfHat <- data.frame(runner, tickets)
+dfHat$prob <- dfHat$tickets / sum(dfHat$tickets)
+table(factor(dfHat$tickets))
+head(dfHat)
+tail(dfHat)
 ```
 
 
@@ -68,17 +68,12 @@ The simulation needs to account for the changing relative distribution of ticket
 
 The matrix `lottery` is an $I \times J$ matrix where row $i$ is the $i$-th simulation and the column $j$ is the $j$-th lottery winner drawn. The number of columns in the matrix is `r spots`, variable `spots`. The number of simulated lotteries is variable `size`. Set the random number seed as the date of the lottery in numeric form multipied by the number of applicants.
 ```{r Simulation}
-size <- 1E3
+size <- 1E4
 set.seed(as.numeric(as.Date("2012-12-08", format="%Y-%m-%d")) * applicants)
 lottery <- matrix(nrow=size, ncol=spots)
 start <- Sys.time()
 for (i in 1:size) {
-  dfHat <- dfHat0
-  for (j in 1:spots){
-    lottery[i, j] <- sample(dfHat$runner, 1, prob=dfHat$prob)
-    dfHat <- subset(dfHat, runner != lottery[i, j])
-    dfHat$prob <- dfHat$tickets / sum(dfHat$tickets)
-  }
+  lottery[i, ] <- sample(dfHat$runner, spots, prob=dfHat$prob)
 }
 end <- Sys.time()
 end - start
@@ -101,7 +96,7 @@ To get at this, first I'll have to match the runners selected to the number of t
 ```{r MatchTickets}
 lottery2 <- matrix(nrow=size, ncol=spots)
 for (i in 1:size) {
-  lottery2[i, ] <- dfHat0$tickets[lottery[i, ]]
+  lottery2[i, ] <- dfHat$tickets[lottery[i, ]]
 }
 ```
 Reformat the `lottery2` matrix to an aggregated data frame for analysis.

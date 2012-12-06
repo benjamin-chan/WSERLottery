@@ -1,6 +1,6 @@
 2013 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-05 16:19:35` using `R version 2.15.2 (2012-10-26)`.
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-05 20:07:18` using `R version 2.15.2 (2012-10-26)`.
 
 I was a little intrigued by how the Western States Endurance Run (WSER) calculated their lottery odds estimates. Their estimates can be found in the WSER 2012 [lottery details](http://www.wser.org/2012/12/03/dec-8-lottery-details).
 
@@ -57,9 +57,9 @@ distn <- c(1486, 480, 207, 122)
 applicants <- sum(distn)
 runner <- seq(1, applicants)
 tickets <- c(rep(4, distn[4]), rep(3, distn[3]), rep(2, distn[2]), rep(1, distn[1]))
-dfHat0 <- data.frame(runner, tickets)
-dfHat0$prob <- dfHat0$tickets/sum(dfHat0$tickets)
-table(factor(dfHat0$tickets))
+dfHat <- data.frame(runner, tickets)
+dfHat$prob <- dfHat$tickets/sum(dfHat$tickets)
+table(factor(dfHat$tickets))
 ```
 
 ```
@@ -69,7 +69,7 @@ table(factor(dfHat0$tickets))
 ```
 
 ```r
-head(dfHat0)
+head(dfHat)
 ```
 
 ```
@@ -83,7 +83,7 @@ head(dfHat0)
 ```
 
 ```r
-tail(dfHat0)
+tail(dfHat)
 ```
 
 ```
@@ -105,24 +105,19 @@ The simulation needs to account for the changing relative distribution of ticket
 The matrix `lottery` is an $I \times J$ matrix where row $i$ is the $i$-th simulation and the column $j$ is the $j$-th lottery winner drawn. The number of columns in the matrix is `270`, variable `spots`. The number of simulated lotteries is variable `size`. Set the random number seed as the date of the lottery in numeric form multipied by the number of applicants.
 
 ```r
-size <- 1000
+size <- 10000
 set.seed(as.numeric(as.Date("2012-12-08", format = "%Y-%m-%d")) * applicants)
 lottery <- matrix(nrow = size, ncol = spots)
 start <- Sys.time()
 for (i in 1:size) {
-    dfHat <- dfHat0
-    for (j in 1:spots) {
-        lottery[i, j] <- sample(dfHat$runner, 1, prob = dfHat$prob)
-        dfHat <- subset(dfHat, runner != lottery[i, j])
-        dfHat$prob <- dfHat$tickets/sum(dfHat$tickets)
-    }
+    lottery[i, ] <- sample(dfHat$runner, spots, prob = dfHat$prob)
 }
 end <- Sys.time()
 end - start
 ```
 
 ```
-## Time difference of 2.815 mins
+## Time difference of 1.098 mins
 ```
 
 
@@ -137,29 +132,29 @@ sampLottery
 
 ```
 ## $lottery
-## [1] 778
+## [1] 9294
 ## 
 ## $runner
-##   [1]    2    8   11   12   14   15   16   22   24   26   28   29   32   33
-##  [15]   41   46   48   50   51   52   60   66   76   83   85   92   93   96
-##  [29]   98  111  113  128  138  144  147  148  156  157  163  166  167  176
-##  [43]  179  180  182  183  186  189  190  193  195  196  198  207  213  214
-##  [57]  228  238  240  243  244  245  252  254  274  279  282  294  303  307
-##  [71]  308  319  322  329  331  335  341  343  360  364  372  377  390  395
-##  [85]  402  410  413  414  418  422  445  450  453  459  463  466  482  499
-##  [99]  503  513  531  533  540  544  545  556  560  561  569  584  587  595
-## [113]  599  600  605  607  609  610  611  613  624  625  627  635  643  652
-## [127]  654  661  670  675  679  683  691  692  713  716  724  725  728  730
-## [141]  733  734  735  747  752  754  756  760  768  783  791  793  801  802
-## [155]  829  851  863  912  916  936  939  940  946  990  995 1019 1031 1045
-## [169] 1055 1068 1105 1108 1135 1138 1209 1229 1234 1254 1291 1299 1303 1311
-## [183] 1314 1315 1323 1334 1354 1355 1367 1377 1386 1403 1407 1413 1417 1422
-## [197] 1425 1447 1496 1499 1503 1518 1520 1531 1539 1558 1564 1580 1590 1610
-## [211] 1629 1640 1641 1692 1711 1731 1754 1761 1765 1799 1806 1809 1814 1821
-## [225] 1826 1832 1842 1853 1860 1866 1872 1883 1885 1888 1905 1916 1924 1928
-## [239] 1931 1933 1951 1952 1953 1957 1959 1987 2008 2016 2041 2042 2043 2055
-## [253] 2063 2065 2074 2077 2110 2119 2134 2139 2152 2168 2187 2197 2207 2239
-## [267] 2255 2258 2282 2283
+##   [1]    5    9   10   13   17   21   22   24   29   30   33   35   41   42
+##  [15]   49   50   55   58   59   62   65   68   72   74   75   89   91   93
+##  [29]   95   99  100  101  106  110  118  121  125  127  129  130  135  138
+##  [43]  139  140  149  163  170  174  179  185  188  190  193  194  197  201
+##  [57]  205  216  218  222  230  236  238  244  250  258  266  271  279  285
+##  [71]  286  291  294  303  308  313  314  318  320  324  337  338  339  341
+##  [85]  346  350  366  371  381  388  396  400  406  414  417  418  427  433
+##  [99]  439  442  443  448  454  465  466  468  488  496  499  516  518  531
+## [113]  549  564  574  575  577  588  593  602  605  612  614  620  636  637
+## [127]  638  639  641  645  654  657  660  664  665  673  713  727  728  745
+## [141]  749  754  757  773  775  778  780  792  800  809  838  848  864  872
+## [155]  876  891  899  901  912  927  947  955  969  973  981 1002 1010 1018
+## [169] 1033 1048 1072 1081 1091 1093 1094 1110 1173 1185 1193 1197 1202 1210
+## [183] 1215 1234 1240 1245 1254 1303 1325 1327 1328 1340 1344 1355 1366 1375
+## [197] 1381 1394 1426 1432 1459 1461 1478 1483 1496 1512 1523 1524 1530 1541
+## [211] 1545 1549 1603 1616 1644 1666 1669 1690 1698 1717 1720 1725 1729 1761
+## [225] 1771 1773 1776 1786 1787 1806 1807 1844 1893 1898 1899 1905 1906 1907
+## [239] 1963 1970 1992 1993 1995 2012 2022 2034 2039 2046 2057 2067 2080 2095
+## [253] 2097 2103 2118 2130 2161 2175 2177 2182 2204 2209 2212 2225 2228 2229
+## [267] 2231 2240 2250 2281
 ```
 
 
@@ -173,7 +168,7 @@ To get at this, first I'll have to match the runners selected to the number of t
 ```r
 lottery2 <- matrix(nrow = size, ncol = spots)
 for (i in 1:size) {
-    lottery2[i, ] <- dfHat0$tickets[lottery[i, ]]
+    lottery2[i, ] <- dfHat$tickets[lottery[i, ]]
 }
 ```
 
@@ -213,7 +208,7 @@ names(simsum) <- c("Tickets", "Mean", "Median", "SD", "N", "EV", "Prob (WSER)",
 
 Summarize lottery simulations
 -----------------------------
-Plot the distribution of probabilities from the `1,000` simulated lotteries. Annotate with the estimated mean selection probability.
+Plot the distribution of probabilities from the `10,000` simulated lotteries. Annotate with the estimated mean selection probability.
 
 ```r
 y1 <- max(density(dfSummary$prob[dfSummary$tickets == 1])$y)
@@ -257,18 +252,18 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
-<!-- Wed Dec 05 16:22:27 2012 -->
+<!-- Wed Dec  5 20:10:20 2012 -->
 <TABLE border=1>
 <TR> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> EV </TH> <TH> Prob (WSER) </TH> <TH> EV (WSER) </TH> <TH> Diff. prob. </TH> <TH> Diff. EV </TH> <TH> % diff. </TH>  </TR>
-  <TR> <TD> 1 </TD> <TD align="right"> 7.92 </TD> <TD align="right"> 7.94 </TD> <TD align="right"> 0.49 </TD> <TD align="right"> 1486.00 </TD> <TD align="right"> 117.67 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 117.39 </TD> <TD align="right"> 0.02 </TD> <TD align="right"> 0.28 </TD> <TD align="right"> 0.23 </TD> </TR>
-  <TR> <TD> 2 </TD> <TD align="right"> 15.18 </TD> <TD align="right"> 15.21 </TD> <TD align="right"> 1.39 </TD> <TD align="right"> 480.00 </TD> <TD align="right"> 72.84 </TD> <TD align="right"> 15.20 </TD> <TD align="right"> 72.96 </TD> <TD align="right"> -0.02 </TD> <TD align="right"> -0.12 </TD> <TD align="right"> -0.16 </TD> </TR>
-  <TR> <TD> 3 </TD> <TD align="right"> 21.86 </TD> <TD align="right"> 21.74 </TD> <TD align="right"> 2.58 </TD> <TD align="right"> 207.00 </TD> <TD align="right"> 45.25 </TD> <TD align="right"> 21.90 </TD> <TD align="right"> 45.33 </TD> <TD align="right"> -0.04 </TD> <TD align="right"> -0.08 </TD> <TD align="right"> -0.17 </TD> </TR>
-  <TR> <TD> 4 </TD> <TD align="right"> 28.06 </TD> <TD align="right"> 27.87 </TD> <TD align="right"> 4.00 </TD> <TD align="right"> 122.00 </TD> <TD align="right"> 34.23 </TD> <TD align="right"> 28.00 </TD> <TD align="right"> 34.16 </TD> <TD align="right"> 0.06 </TD> <TD align="right"> 0.07 </TD> <TD align="right"> 0.22 </TD> </TR>
+  <TR> <TD> 1 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 7.87 </TD> <TD align="right"> 0.51 </TD> <TD align="right"> 1486.00 </TD> <TD align="right"> 117.47 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 117.39 </TD> <TD align="right"> 0.01 </TD> <TD align="right"> 0.08 </TD> <TD align="right"> 0.07 </TD> </TR>
+  <TR> <TD> 2 </TD> <TD align="right"> 15.19 </TD> <TD align="right"> 15.21 </TD> <TD align="right"> 1.40 </TD> <TD align="right"> 480.00 </TD> <TD align="right"> 72.91 </TD> <TD align="right"> 15.20 </TD> <TD align="right"> 72.96 </TD> <TD align="right"> -0.01 </TD> <TD align="right"> -0.05 </TD> <TD align="right"> -0.06 </TD> </TR>
+  <TR> <TD> 3 </TD> <TD align="right"> 21.91 </TD> <TD align="right"> 21.74 </TD> <TD align="right"> 2.65 </TD> <TD align="right"> 207.00 </TD> <TD align="right"> 45.36 </TD> <TD align="right"> 21.90 </TD> <TD align="right"> 45.33 </TD> <TD align="right"> 0.01 </TD> <TD align="right"> 0.02 </TD> <TD align="right"> 0.05 </TD> </TR>
+  <TR> <TD> 4 </TD> <TD align="right"> 28.08 </TD> <TD align="right"> 27.87 </TD> <TD align="right"> 3.81 </TD> <TD align="right"> 122.00 </TD> <TD align="right"> 34.26 </TD> <TD align="right"> 28.00 </TD> <TD align="right"> 34.16 </TD> <TD align="right"> 0.08 </TD> <TD align="right"> 0.10 </TD> <TD align="right"> 0.29 </TD> </TR>
    </TABLE>
 
-My estimates and the probabilities calculated by WSER are essentially identical. Percent difference is never more than `0.2346`%.
+My estimates and the probabilities calculated by WSER are essentially identical. Percent difference is never more than `0.2913`%.
 
-Plot the outcomes of a random sample of the `1,000` simulated lotteries.
+Plot the outcomes of a random sample of the `10,000` simulated lotteries.
 
 ```r
 s <- 100
