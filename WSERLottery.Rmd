@@ -123,6 +123,12 @@ dfSummary <- data.frame(sim, tickets, freq)
 end <- Sys.time()
 end - start
 ```
+Save the aggregated data frame for other analysis.
+```{r Save}
+setwd("~/Dropbox/Sandbox/WSERLottery")
+save(aggLottery, file="aggLottery.RData")
+```
+
 For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the proportion of selected applicants. 
 ```{r Probabilities}
 total <- rep(distn, size)
@@ -196,3 +202,39 @@ ggplot(dfSample, aes(x=sim, fill=tickets)) +
   coord_flip() +
   theme(legend.position="top")
 ```
+
+
+Actual results
+--------------
+The actual lottery was held on December 8, 2012. Here are the results.
+
+> Percentages for tickets holders drawn in lottery today:  
+> 1 Ticket - 128 8.6%  
+> 2 Ticket - 68 14.1%  
+> 3 Ticket - 37 17.8%  
+> 4 Ticket - 42 34.4%  
+
+These results include the 5 winners of the 
+> Bonus Drawing at the end of the Lottery giv[ing] those present “one last chance” to be selected.
+
+So I'll need to subtract out the 5 winners of the bonus drawing. Three of the bonus drawing winners were 1-ticket holders, 1 was a 3-ticket holder, and 1 was a 4-ticket holder.
+
+Compare the observed lottery to the expected lottery.
+```{r ObsCompare, results='asis'}
+yObs <- c(128 - 3, 68, 37 - 1, 42 - 1)
+yExp <- simsum$EV
+dfObsExp <- data.frame(yObs, yExp, diff=yObs - yExp)
+names(dfObsExp) <- c("Observed", "Expected", "Difference")
+print(xtable(dfObsExp), type="html", include.rownames=FALSE)
+```
+
+I wonder how many times this outcome appeared in my simulated lotteries. 
+```{r SimObserved}
+y1 <- aggLottery$tickets[,1] == yObs[1]
+y2 <- aggLottery$tickets[,2] == yObs[2]
+y3 <- aggLottery$tickets[,3] == yObs[3]
+y4 <- aggLottery$tickets[,4] == yObs[4]
+y <- y1 & y2 & y3 & y4
+aggLottery[y,]
+```
+Of the `r format(size, big.mark=",")` simulated lotteries, only `r sum(y)`, or `r 100 * sum(y) / size`%, matched the exact outcome of the actual lottery.

@@ -1,6 +1,6 @@
 2013 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-06 10:50:27` using `R version 2.15.2 (2012-10-26)`.
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `2012-12-09 21:27:07` using `R version 2.15.2 (2012-10-26)`.
 
 I was a little intrigued by how the Western States Endurance Run (WSER) calculated their lottery odds estimates. Their estimates can be found in the WSER 2012 [lottery details](http://www.wser.org/2012/12/03/dec-8-lottery-details).
 
@@ -117,7 +117,7 @@ end - start
 ```
 
 ```
-## Time difference of 6.693 secs
+## Time difference of 1.138 mins
 ```
 
 
@@ -207,8 +207,16 @@ end - start
 ```
 
 ```
-## Time difference of 13.8 secs
+## Time difference of 1.69 mins
 ```
+
+Save the aggregated data frame for other analysis.
+
+```r
+setwd("~/Dropbox/Sandbox/WSERLottery")
+save(aggLottery, file = "aggLottery.RData")
+```
+
 
 For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the proportion of selected applicants. 
 
@@ -277,7 +285,7 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
-<!-- Thu Dec 06 10:50:50 2012 -->
+<!-- Sun Dec  9 21:30:11 2012 -->
 <TABLE border=1>
 <TR> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> EV </TH> <TH> Prob (WSER) </TH> <TH> EV (WSER) </TH> <TH> Diff. prob. </TH> <TH> Diff. EV </TH> <TH> % diff. </TH>  </TR>
   <TR> <TD> 1 </TD> <TD align="right"> 7.91 </TD> <TD align="right"> 7.87 </TD> <TD align="right"> 0.51 </TD> <TD align="right"> 1486.00 </TD> <TD align="right"> 117.47 </TD> <TD align="right"> 7.90 </TD> <TD align="right"> 117.39 </TD> <TD align="right"> 0.01 </TD> <TD align="right"> 0.08 </TD> <TD align="right"> 0.07 </TD> </TR>
@@ -306,3 +314,58 @@ ggplot(dfSample, aes(x = sim, fill = tickets)) + geom_bar(width = 1) + geom_hlin
 
 ![plot of chunk PlotLotteryResults](figure/PlotLotteryResults.png) 
 
+
+
+Actual results
+--------------
+The actual lottery was held on December 8, 2012. Here are the results.
+
+> Percentages for tickets holders drawn in lottery today:  
+> 1 Ticket - 128 8.6%  
+> 2 Ticket - 68 14.1%  
+> 3 Ticket - 37 17.8%  
+> 4 Ticket - 42 34.4%  
+
+These results include the 5 winners of the 
+> Bonus Drawing at the end of the Lottery giv[ing] those present “one last chance” to be selected.
+
+So I'll need to subtract out the 5 winners of the bonus drawing. Three of the bonus drawing winners were 1-ticket holders, 1 was a 3-ticket holder, and 1 was a 4-ticket holder.
+
+Compare the observed lottery to the expected lottery.
+
+```r
+yObs <- c(128 - 3, 68, 37 - 1, 42 - 1)
+yExp <- simsum$EV
+dfObsExp <- data.frame(yObs, yExp, diff = yObs - yExp)
+names(dfObsExp) <- c("Observed", "Expected", "Difference")
+print(xtable(dfObsExp), type = "html", include.rownames = FALSE)
+```
+
+<!-- html table generated in R 2.15.2 by xtable 1.7-0 package -->
+<!-- Sun Dec  9 21:30:25 2012 -->
+<TABLE border=1>
+<TR> <TH> Observed </TH> <TH> Expected </TH> <TH> Difference </TH>  </TR>
+  <TR> <TD align="right"> 125.00 </TD> <TD align="right"> 117.47 </TD> <TD align="right"> 7.53 </TD> </TR>
+  <TR> <TD align="right"> 68.00 </TD> <TD align="right"> 72.91 </TD> <TD align="right"> -4.91 </TD> </TR>
+  <TR> <TD align="right"> 36.00 </TD> <TD align="right"> 45.36 </TD> <TD align="right"> -9.36 </TD> </TR>
+  <TR> <TD align="right"> 41.00 </TD> <TD align="right"> 34.26 </TD> <TD align="right"> 6.74 </TD> </TR>
+   </TABLE>
+
+
+I wonder how many times this outcome appeared in my simulated lotteries. 
+
+```r
+y1 <- aggLottery$tickets[, 1] == yObs[1]
+y2 <- aggLottery$tickets[, 2] == yObs[2]
+y3 <- aggLottery$tickets[, 3] == yObs[3]
+y4 <- aggLottery$tickets[, 4] == yObs[4]
+y <- y1 & y2 & y3 & y4
+aggLottery[y, ]
+```
+
+```
+##       sim tickets.1 tickets.2 tickets.3 tickets.4
+## 3646 3646       125        68        36        41
+```
+
+Of the `10,000` simulated lotteries, only `1`, or `0.01`%, matched the exact outcome of the actual lottery.
