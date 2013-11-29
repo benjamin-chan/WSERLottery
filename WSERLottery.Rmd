@@ -65,7 +65,7 @@ The simulation needs to account for the changing relative distribution of ticket
 
 The matrix `lottery` is an $I \times J$ matrix where row $i$ is the $i$-th simulation and the column $j$ is the $j$-th lottery winner drawn. The number of columns in the matrix is `r spots`, variable `spots`. The number of simulated lotteries is variable `size`. Set the random number seed as the date of the lottery in numeric form multipied by the number of applicants.
 ```{r Simulation}
-size <- 20E3
+size <- 100E3
 dateLottery <- as.Date("2013-12-07", format="%Y-%m-%d")
 set.seed(as.numeric(dateLottery) * applicants)
 lottery <- matrix(nrow=size, ncol=spots)
@@ -120,7 +120,6 @@ frameSummary <- data.frame(sim, tickets, freq)
 ```
 Save the aggregated data frame for other analysis.
 ```{r Save}
-setwd("~/Copy/Sandbox/WSERLottery")
 save(aggLottery, file="aggLottery.RData")
 ```
 
