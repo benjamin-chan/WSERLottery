@@ -5,20 +5,26 @@ Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `r paste(Sys.time
 
 Details
 -------
-From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html)
-> Total Tickets: 4316     Total Entrants: 2715
+From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html). **Use this table** for input data on the number entrants for each ticket count. The index of the vector will serve as the ticket count.
+
+> Total Tickets: 4312     Total Entrants: 2705
 >  
-> Last Updated: 11/27/2013 4:00PM PST
+> Last Updated: 12/02/2013 7:00AM PST
 >  
 > Ticket Count | Entrants | Tickets  
 > -------------|----------|--------
-> 5 | 52 | 260  
+> 5 | 53 | 265  
 > 4 | 106 | 424  
-> 3 | 257 | 771  
+> 3 | 258 | 774  
 > 2 | 561 | 1122  
-> 1 | 1739 | 1739  
+> 1 | 1727 | 1727  
 
-This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/) page. Since this is where selection probabilities are shown, **use this table** for input data on the number of tickets and entrants.
+```{r}
+distn <- c(1727, 561, 258, 106, 53)
+```
+
+
+This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics) page.  **Use this table** for input data on the selection probabilities.
 > Tickets | # of Entrants | Probability (%) | Expected # Selected | Expected % Selected  
 > --------|---------------|-----------------|---------------------|--------------------
 > 1 | 1749 | 6.46 | 112.9 | 41.8  
@@ -29,7 +35,6 @@ This information is different from what is shown on the [2014 lottery statistics
 > Totals | 2730 |  | 270.0 | 100.0
 
 ```{r}
-distn <- c(1749, 565, 257, 107, 52)
 probWSER <- c(6.46, 12.49, 18.16, 23.43, 28.39)
 ```
 

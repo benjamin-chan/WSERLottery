@@ -1,6 +1,6 @@
 2014 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on 2013-11-29 08:29:15 using R version 3.0.2 (2013-09-25).
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on 2013-11-29 08:40:26 using R version 3.0.2 (2013-09-25).
 
 
 Details
@@ -114,7 +114,7 @@ system.time(for (i in 1:size) {
 
 ```
 ##    user  system elapsed 
-##   79.67    0.04   79.92
+##   79.48    0.08   79.75
 ```
 
 
@@ -200,7 +200,7 @@ system.time(aggLottery <- aggregate(tickets ~ sim, frameLottery, table))
 
 ```
 ##    user  system elapsed 
-##  264.57    1.87  268.04
+##  258.37    1.64  260.66
 ```
 
 ```r
@@ -211,14 +211,6 @@ frameSummary <- data.frame(sim, tickets, freq)
 ```
 
 Save the aggregated data frame for other analysis.
-
-```r
-setwd("~/Copy/Sandbox/WSERLottery")
-```
-
-```
-## Error: cannot change working directory
-```
 
 ```r
 save(aggLottery, file = "aggLottery.RData")
@@ -306,7 +298,7 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Fri Nov 29 08:35:49 2013 -->
+<!-- Fri Nov 29 08:46:51 2013 -->
 <TABLE border=1>
 <TR> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> EV </TH> <TH> Prob (WSER) </TH> <TH> EV (WSER) </TH> <TH> Diff. prob. </TH> <TH> Diff. EV </TH> <TH> % diff. </TH> <TH> Sq. error </TH>  </TR>
   <TR> <TD> 1 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 0.44 </TD> <TD align="right"> 1749.00 </TD> <TD align="right"> 112.95 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 112.99 </TD> <TD align="right"> -0.00 </TD> <TD align="right"> -0.04 </TD> <TD align="right"> -0.03 </TD> <TD align="right"> 0.00 </TD> </TR>

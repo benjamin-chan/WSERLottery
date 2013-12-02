@@ -1,24 +1,32 @@
 2014 Western States Endurance Run Lottery
 =========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on 2013-11-29 08:40:26 using R version 3.0.2 (2013-09-25).
+Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on 2013-12-02 09:20:49 using R version 3.0.2 (2013-09-25).
 
 
 Details
 -------
-From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html)
-> Total Tickets: 4316     Total Entrants: 2715
+From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html). **Use this table** for input data on the number entrants for each ticket count. The index of the vector will serve as the ticket count.
+
+> Total Tickets: 4312     Total Entrants: 2705
 >  
-> Last Updated: 11/27/2013 4:00PM PST
+> Last Updated: 12/02/2013 7:00AM PST
 >  
 > Ticket Count | Entrants | Tickets  
 > -------------|----------|--------
-> 5 | 52 | 260  
+> 5 | 53 | 265  
 > 4 | 106 | 424  
-> 3 | 257 | 771  
+> 3 | 258 | 774  
 > 2 | 561 | 1122  
-> 1 | 1739 | 1739  
+> 1 | 1727 | 1727  
 
-This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/) page. Since this is where selection probabilities are shown, **use this table** for input data on the number of tickets and entrants.
+
+```r
+distn <- c(1727, 561, 258, 106, 53)
+```
+
+
+
+This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics) page.  **Use this table** for input data on the selection probabilities.
 > Tickets | # of Entrants | Probability (%) | Expected # Selected | Expected % Selected  
 > --------|---------------|-----------------|---------------------|--------------------
 > 1 | 1749 | 6.46 | 112.9 | 41.8  
@@ -30,7 +38,6 @@ This information is different from what is shown on the [2014 lottery statistics
 
 
 ```r
-distn <- c(1749, 565, 257, 107, 52)
 probWSER <- c(6.46, 12.49, 18.16, 23.43, 28.39)
 ```
 
@@ -63,7 +70,7 @@ addmargins(table(factor(frameHat$tickets)))
 ```
 ## 
 ##    1    2    3    4    5  Sum 
-## 1749  565  257  107   52 2730
+## 1727  561  258  106   53 2705
 ```
 
 ```r
@@ -71,13 +78,13 @@ head(frameHat)
 ```
 
 ```
-##   runner tickets     prob
-## 1      1       5 0.001153
-## 2      2       5 0.001153
-## 3      3       5 0.001153
-## 4      4       5 0.001153
-## 5      5       5 0.001153
-## 6      6       5 0.001153
+##   runner tickets    prob
+## 1      1       5 0.00116
+## 2      2       5 0.00116
+## 3      3       5 0.00116
+## 4      4       5 0.00116
+## 5      5       5 0.00116
+## 6      6       5 0.00116
 ```
 
 ```r
@@ -86,12 +93,12 @@ tail(frameHat)
 
 ```
 ##      runner tickets      prob
-## 2725   2725       1 0.0002305
-## 2726   2726       1 0.0002305
-## 2727   2727       1 0.0002305
-## 2728   2728       1 0.0002305
-## 2729   2729       1 0.0002305
-## 2730   2730       1 0.0002305
+## 2700   2700       1 0.0002319
+## 2701   2701       1 0.0002319
+## 2702   2702       1 0.0002319
+## 2703   2703       1 0.0002319
+## 2704   2704       1 0.0002319
+## 2705   2705       1 0.0002319
 ```
 
 
@@ -114,7 +121,7 @@ system.time(for (i in 1:size) {
 
 ```
 ##    user  system elapsed 
-##   79.48    0.08   79.75
+##   80.11    0.11   80.47
 ```
 
 
@@ -129,29 +136,29 @@ sampLottery
 
 ```
 ## $lottery
-## [1] 19414
+## [1] 34444
 ## 
 ## $runner
-##   [1]    2    3    5    6    8    9   10   27   28   36   42   45   48   50
-##  [15]   63   64   66   78   85   88   89   92   95   96  105  112  115  121
-##  [29]  122  126  131  135  141  143  150  153  154  172  179  183  184  189
-##  [43]  195  199  207  225  227  228  233  246  253  255  262  263  285  289
-##  [57]  298  299  307  310  313  325  331  333  337  348  354  363  367  371
-##  [71]  378  380  382  393  395  397  398  399  401  406  408  411  412  421
-##  [85]  424  440  441  444  450  456  472  473  475  483  485  495  501  504
-##  [99]  511  525  535  554  575  605  606  617  618  631  635  642  643  679
-## [113]  690  703  708  722  731  735  748  752  759  762  768  787  788  790
-## [127]  795  797  799  803  822  823  827  829  831  842  847  850  868  871
-## [141]  880  893  894  902  909  915  918  936  941  944  946  947  952  953
-## [155]  957  964 1019 1074 1077 1125 1137 1143 1152 1158 1168 1170 1172 1192
-## [169] 1198 1211 1214 1227 1228 1256 1279 1280 1303 1310 1315 1323 1329 1342
-## [183] 1347 1399 1404 1414 1423 1433 1434 1436 1442 1445 1447 1468 1511 1520
-## [197] 1527 1537 1547 1567 1575 1599 1612 1660 1673 1702 1719 1736 1745 1749
-## [211] 1753 1764 1766 1767 1774 1775 1808 1825 1838 1839 1848 1852 1891 1901
-## [225] 1914 1917 1949 1959 1989 1999 2027 2033 2040 2043 2056 2059 2088 2096
-## [239] 2106 2110 2126 2130 2132 2136 2140 2144 2255 2272 2276 2301 2304 2310
-## [253] 2352 2377 2385 2399 2484 2504 2543 2565 2566 2574 2592 2617 2625 2643
-## [267] 2660 2669 2670 2672
+##   [1]    2    4   12   13   17   27   32   37   45   48   50   52   53   55
+##  [15]   64   72   73   74   91   95   99  101  117  122  123  125  136  137
+##  [29]  146  151  153  166  167  169  183  188  194  197  199  208  212  214
+##  [43]  222  225  227  251  252  261  263  282  297  307  308  311  313  319
+##  [57]  322  323  334  335  339  340  344  349  353  358  360  365  375  380
+##  [71]  381  386  394  395  400  405  407  412  418  470  476  477  481  485
+##  [85]  491  492  494  500  510  511  517  523  524  544  549  569  573  591
+##  [99]  592  599  603  611  612  621  642  657  666  681  688  690  723  724
+## [113]  732  743  752  771  781  794  798  803  809  813  831  832  833  861
+## [127]  876  882  889  894  899  905  908  911  914  928  932  937  939  944
+## [141]  946  949  975  976 1023 1027 1036 1042 1047 1068 1086 1087 1088 1113
+## [155] 1126 1155 1241 1263 1272 1295 1330 1363 1382 1383 1387 1389 1408 1416
+## [169] 1435 1440 1458 1481 1490 1501 1514 1516 1520 1522 1550 1558 1575 1590
+## [183] 1618 1624 1636 1637 1639 1640 1656 1665 1690 1695 1707 1717 1718 1727
+## [197] 1733 1744 1747 1759 1764 1784 1790 1808 1822 1832 1836 1841 1848 1869
+## [211] 1885 1902 1910 1935 1964 1998 2013 2051 2065 2089 2098 2103 2127 2135
+## [225] 2136 2144 2154 2165 2167 2171 2175 2181 2184 2198 2206 2224 2238 2246
+## [239] 2250 2264 2275 2284 2293 2344 2355 2361 2365 2366 2372 2373 2385 2422
+## [253] 2448 2468 2472 2476 2519 2539 2554 2564 2589 2601 2611 2623 2631 2655
+## [267] 2662 2669 2683 2686
 ```
 
 Here's the distribution of the category of ticket holders from that random simulated lottery.
@@ -163,15 +170,15 @@ addmargins(table(frameHat$tickets[sampLottery$runner]))
 ```
 ## 
 ##   1   2   3   4   5 Sum 
-## 114  73  46  23  14 270
+## 126  66  47  18  13 270
 ```
 
-I.e., in simulated lottery 19414, 
-* 114 applicants with 1 ticket were selected  (6.5%)
-* 73 applicants with 2 tickets were selected (13%)
-* 46 applicants with 3 tickets were selected (18%)
-* 23 applicants with 4 tickets were selected (21%)
-* 14 applicants with 5 tickets were selected (27%)
+I.e., in simulated lottery 34444, 
+* 126 applicants with 1 ticket were selected  (7.3%)
+* 66 applicants with 2 tickets were selected (12%)
+* 47 applicants with 3 tickets were selected (18%)
+* 18 applicants with 4 tickets were selected (17%)
+* 13 applicants with 5 tickets were selected (25%)
 
 Okay... but what happened with the other 9.9999 &times; 10<sup>4</sup> simulated lotteries?
 
@@ -200,7 +207,7 @@ system.time(aggLottery <- aggregate(tickets ~ sim, frameLottery, table))
 
 ```
 ##    user  system elapsed 
-##  258.37    1.64  260.66
+##   262.7     1.8   265.1
 ```
 
 ```r
@@ -298,17 +305,17 @@ print(xtable(simsum), type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 3.0.2 by xtable 1.7-1 package -->
-<!-- Fri Nov 29 08:46:51 2013 -->
+<!-- Mon Dec 02 09:27:22 2013 -->
 <TABLE border=1>
 <TR> <TH> Tickets </TH> <TH> Mean </TH> <TH> Median </TH> <TH> SD </TH> <TH> N </TH> <TH> EV </TH> <TH> Prob (WSER) </TH> <TH> EV (WSER) </TH> <TH> Diff. prob. </TH> <TH> Diff. EV </TH> <TH> % diff. </TH> <TH> Sq. error </TH>  </TR>
-  <TR> <TD> 1 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 0.44 </TD> <TD align="right"> 1749.00 </TD> <TD align="right"> 112.95 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 112.99 </TD> <TD align="right"> -0.00 </TD> <TD align="right"> -0.04 </TD> <TD align="right"> -0.03 </TD> <TD align="right"> 0.00 </TD> </TR>
-  <TR> <TD> 2 </TD> <TD align="right"> 12.50 </TD> <TD align="right"> 12.57 </TD> <TD align="right"> 1.19 </TD> <TD align="right"> 565.00 </TD> <TD align="right"> 70.61 </TD> <TD align="right"> 12.49 </TD> <TD align="right"> 70.57 </TD> <TD align="right"> 0.01 </TD> <TD align="right"> 0.04 </TD> <TD align="right"> 0.05 </TD> <TD align="right"> 0.00 </TD> </TR>
-  <TR> <TD> 3 </TD> <TD align="right"> 18.14 </TD> <TD align="right"> 18.29 </TD> <TD align="right"> 2.20 </TD> <TD align="right"> 257.00 </TD> <TD align="right"> 46.62 </TD> <TD align="right"> 18.16 </TD> <TD align="right"> 46.67 </TD> <TD align="right"> -0.02 </TD> <TD align="right"> -0.05 </TD> <TD align="right"> -0.11 </TD> <TD align="right"> 0.00 </TD> </TR>
-  <TR> <TD> 4 </TD> <TD align="right"> 23.43 </TD> <TD align="right"> 23.36 </TD> <TD align="right"> 3.93 </TD> <TD align="right"> 107.00 </TD> <TD align="right"> 25.07 </TD> <TD align="right"> 23.43 </TD> <TD align="right"> 25.07 </TD> <TD align="right"> 0.00 </TD> <TD align="right"> 0.00 </TD> <TD align="right"> 0.01 </TD> <TD align="right"> 0.00 </TD> </TR>
-  <TR> <TD> 5 </TD> <TD align="right"> 28.37 </TD> <TD align="right"> 28.85 </TD> <TD align="right"> 6.13 </TD> <TD align="right"> 52.00 </TD> <TD align="right"> 14.75 </TD> <TD align="right"> 28.39 </TD> <TD align="right"> 14.76 </TD> <TD align="right"> -0.02 </TD> <TD align="right"> -0.01 </TD> <TD align="right"> -0.06 </TD> <TD align="right"> 0.00 </TD> </TR>
+  <TR> <TD> 1 </TD> <TD align="right"> 6.50 </TD> <TD align="right"> 6.49 </TD> <TD align="right"> 0.44 </TD> <TD align="right"> 1727.00 </TD> <TD align="right"> 112.23 </TD> <TD align="right"> 6.46 </TD> <TD align="right"> 111.56 </TD> <TD align="right"> 0.04 </TD> <TD align="right"> 0.66 </TD> <TD align="right"> 0.59 </TD> <TD align="right"> 0.00 </TD> </TR>
+  <TR> <TD> 2 </TD> <TD align="right"> 12.57 </TD> <TD align="right"> 12.48 </TD> <TD align="right"> 1.20 </TD> <TD align="right"> 561.00 </TD> <TD align="right"> 70.54 </TD> <TD align="right"> 12.49 </TD> <TD align="right"> 70.07 </TD> <TD align="right"> 0.08 </TD> <TD align="right"> 0.47 </TD> <TD align="right"> 0.66 </TD> <TD align="right"> 0.01 </TD> </TR>
+  <TR> <TD> 3 </TD> <TD align="right"> 18.27 </TD> <TD align="right"> 18.22 </TD> <TD align="right"> 2.20 </TD> <TD align="right"> 258.00 </TD> <TD align="right"> 47.13 </TD> <TD align="right"> 18.16 </TD> <TD align="right"> 46.85 </TD> <TD align="right"> 0.11 </TD> <TD align="right"> 0.28 </TD> <TD align="right"> 0.60 </TD> <TD align="right"> 0.01 </TD> </TR>
+  <TR> <TD> 4 </TD> <TD align="right"> 23.56 </TD> <TD align="right"> 23.58 </TD> <TD align="right"> 3.95 </TD> <TD align="right"> 106.00 </TD> <TD align="right"> 24.98 </TD> <TD align="right"> 23.43 </TD> <TD align="right"> 24.84 </TD> <TD align="right"> 0.13 </TD> <TD align="right"> 0.14 </TD> <TD align="right"> 0.57 </TD> <TD align="right"> 0.02 </TD> </TR>
+  <TR> <TD> 5 </TD> <TD align="right"> 28.54 </TD> <TD align="right"> 28.30 </TD> <TD align="right"> 6.08 </TD> <TD align="right"> 53.00 </TD> <TD align="right"> 15.13 </TD> <TD align="right"> 28.39 </TD> <TD align="right"> 15.05 </TD> <TD align="right"> 0.15 </TD> <TD align="right"> 0.08 </TD> <TD align="right"> 0.52 </TD> <TD align="right"> 0.02 </TD> </TR>
    </TABLE>
 
-My estimates and the probabilities calculated by WSER are essentially identical. Percent differences of the selection probabilities are never more than 0.1101% and the mean squared error of the selection probabilities is 0.000157.
+My estimates and the probabilities calculated by WSER are essentially identical. Percent differences of the selection probabilities are never more than 0.6611% and the mean squared error of the selection probabilities is 0.012134.
 
 Plot the outcomes of a random sample of the 1e+05 simulated lotteries as a [waffle plot](http://www.improving-visualisation.org/vis/id=179). The width of each bar represents the number of selected runners. Blocks represent 10 runners.
 
