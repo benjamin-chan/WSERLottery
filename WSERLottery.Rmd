@@ -6,46 +6,42 @@ Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `r paste(Sys.time
 Details
 -------
 From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html). **Use this table** for input data on the number entrants for each ticket count. The index of the vector will serve as the ticket count.
-
 > Total Tickets: 4312     Total Entrants: 2705
 >  
 > Last Updated: 12/02/2013 7:00AM PST
 >  
 > Ticket Count | Entrants | Tickets  
 > -------------|----------|--------
-> 5 | 53 | 265  
-> 4 | 106 | 424  
-> 3 | 258 | 774  
-> 2 | 561 | 1122  
-> 1 | 1727 | 1727  
+>            5 |       53 |     265  
+>            4 |      106 |     424  
+>            3 |      258 |     774  
+>            2 |      561 |    1122  
+>            1 |     1727 |    1727  
 
 ```{r}
 distn <- c(1727, 561, 258, 106, 53)
 ```
 
-
-This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics) page.  **Use this table** for input data on the selection probabilities.
+This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics) page, which was posted on 11/27/2013, a few days before the update above. I'm pretty sure any difference between my numbers and what's at the link above is that WSER runs their simulation before some entries get verified and corrected. **Use this table** for input data on the selection probabilities to compare my simulations to. 
 > Tickets | # of Entrants | Probability (%) | Expected # Selected | Expected % Selected  
 > --------|---------------|-----------------|---------------------|--------------------
-> 1 | 1749 | 6.46 | 112.9 | 41.8  
-> 2 | 565 | 12.49 | 70.6 | 26.1  
-> 3 | 257 | 18.16 | 46.7 | 17.3  
-> 4 | 107 | 23.43 | 25.1 | 9.3  
-> 5 | 52 | 28.39 | 14.8 | 5.5  
-> Totals | 2730 |  | 270.0 | 100.0
+>       1 |          1749 |            6.46 |               112.9 |                41.8  
+>       2 |           565 |           12.49 |                70.6 |                26.1  
+>       3 |           257 |           18.16 |                46.7 |                17.3  
+>       4 |           107 |           23.43 |                25.1 |                 9.3  
+>       5 |            52 |           28.39 |                14.8 |                 5.5  
+>  Totals |          2730 |                 |               270.0 |               100.0
 
 ```{r}
 probWSER <- c(6.46, 12.49, 18.16, 23.43, 28.39)
 ```
 
-
 Here, I run a simulation of the lottery process to estimate probabilities of winning a slot for the Western States Endurance Run. The simulation does a few things
-* Accounts for the changing probability distribution of the lottery hat as runners are selected
-* Once a runner is selected, their tickets are withdrawn from the hat
-* For each simulated lottery, the distribution of selected 1-ticket, 2-ticket, 3-ticket, 4-ticket, adn 5-ticket runners is determined
-* From this distributions of the simulated lotteries, the estimated selection probabilities are characterized
-* Selection probability distributions are plotted
-* Selection distributions from the simulated lotteries are also plotted
+* Use the `sample` function in R to sample without replacement using the number of tickets each entrant has divided by the total number of tickets in the *hat* as each entrant's selection probability for a single draw
+* Select draws from the *hat* equal to the number of spots available
+* Repeat each *lottery* a number of times
+* Use the `aggregate` function to summarize the simulations and derive an emperical distribution of selection probabilities
+* Plot the selection probability distributions
 
 
 Set up initial conditions
@@ -132,23 +128,27 @@ For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the pr
 ```{r Probabilities}
 total <- rep(distn, size)
 frameSummary$prob <- 100 * (frameSummary$freq / total)
-avg <- aggregate(prob ~ tickets, frameSummary, mean)
-med <- aggregate(prob ~ tickets, frameSummary, median)
-sd  <- aggregate(prob ~ tickets, frameSummary, sd)
-ev <- distn * avg[, 2] / 100
+aggFx <- function(x) {c(mean = mean(x), median = median(x), sd = sd(x))}
+aggProb <- aggregate(prob ~ tickets, frameSummary, aggFx)
+ev <- distn * aggProb[, "prob"][, "mean"] / 100
 evWSER <- distn * probWSER / 100
-diffprob <- avg[, 2] - probWSER
+diffprob <- aggProb[, "prob"][, "mean"] - probWSER
 diffev <- ev - evWSER
-pctdiff <- 100 * diffprob / avg[, 2]
+pctdiff <- 100 * diffprob / aggProb[, "prob"][, "mean"]
 sqerr <- diffprob ^2
-simsum <- data.frame(avg, med[, 2], sd[, 2], distn, ev, probWSER, evWSER, diffprob, diffev, pctdiff, sqerr)
-names(simsum) <- c("Tickets", "Mean", "Median", "SD", "N", "EV", "Prob (WSER)", "EV (WSER)", "Diff. prob.", "Diff. EV", "% diff.", "Sq. error")
+simsum <- data.frame(tickets = aggProb[, "tickets"], distn, mean = aggProb[, "prob"][, "mean"], ev, probWSER, evWSER, diffprob, diffev, pctdiff, sqerr)
+names(simsum) <- c("Tickets", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Diff. prob.", "Diff. EV", "% diff.", "Sq. error")
 ```
 
 Summarize lottery simulations
 -----------------------------
 Plot the distribution of probabilities from the `r format(size, big.mark=",")` simulated lotteries. Annotate with the estimated mean selection probability.
 ```{r PlotProbabilities}
+title <- "2014 WSER Lottery Selection Probability Densities"
+xlab <- "Probability of selection"
+ylab <- paste("Proportion of", format(size, big.mark=","), "simulations")
+filllab <- "Tickets"
+annolab <- sprintf("%.2f%%", simsum$Mean)
 y1 <- max(density(frameSummary$prob[frameSummary$tickets == 1])$y)
 y2 <- max(density(frameSummary$prob[frameSummary$tickets == 2])$y)
 y3 <- max(density(frameSummary$prob[frameSummary$tickets == 3])$y)
@@ -156,31 +156,34 @@ y4 <- max(density(frameSummary$prob[frameSummary$tickets == 4])$y)
 y5 <- max(density(frameSummary$prob[frameSummary$tickets == 5])$y)
 y <- c(y1, y2, y3, y4, y5)
 require(ggplot2, quietly=TRUE)
-g <- ggplot(frameSummary, aes(x=prob, y=..density.., fill=tickets))
-g <- g + geom_density(alpha=1/2, color=NA)
-g <- g + scale_fill_brewer(type="div", palette="BrBG")
-g <- g + labs(title="2014 WSER Lottery Selection Probability Densities", x="Percent", y=paste("Proportion of", format(size, big.mark=","), "simulations"), fill="Tickets")
-g <- g + annotate("text", label=paste(format(simsum$Mean, digits=2, trim=TRUE), "%", sep=""), x=simsum$Mean, y=y)
-g <- g + theme(legend.position="bottom")
-g
+ggplot(frameSummary, aes(x=prob, y=..density.., fill=tickets)) +
+  geom_density(alpha=1/2, color=NA) +
+  scale_fill_brewer(type="div", palette="BrBG") +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  annotate("text", label=annolab, x=simsum$Mean, y=y) +
+  theme(legend.position="bottom")
 ```
 As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$).
 
 Another way to think about the lottery is to plot the distribution of the frequency of runners selected by number of tickets. Annotate with the estimated expected value.
 ```{r PlotFrequencies}
+title <- "2014 WSER Lottery Selection Distribution Densities"
+xlab <- "Number of entrants selected"
+ylab <- paste("Proportion of", format(size, big.mark=","), "simulations")
+filllab <- "Tickets"
+annolab <- sprintf("%.1f", simsum$EV)
 y1 <- max(density(frameSummary$freq[frameSummary$tickets == 1])$y)
 y2 <- max(density(frameSummary$freq[frameSummary$tickets == 2])$y)
 y3 <- max(density(frameSummary$freq[frameSummary$tickets == 3])$y)
 y4 <- max(density(frameSummary$freq[frameSummary$tickets == 4])$y)
 y5 <- max(density(frameSummary$freq[frameSummary$tickets == 5])$y)
 y <- c(y1, y2, y3, y4, y5)
-g <- ggplot(frameSummary, aes(x=freq, y=..density.., fill=tickets))
-g <- g + geom_density(alpha=1/2, color=NA)
-g <- g + scale_fill_brewer(type="div", palette="BrBG")
-g <- g + labs(title="2014 WSER Lottery Selection Distribution Densities", x="Number", y=paste("Proportion of", format(size, big.mark=","), "simulations"), fill="Tickets")
-g <- g + annotate("text", label=format(simsum$EV, digits=2, trim=TRUE), x=simsum$EV, y=y)
-g <- g + theme(legend.position="bottom")
-g
+ggplot(frameSummary, aes(x=freq, y=..density.., fill=tickets)) +
+  geom_density(alpha=1/2, color=NA) +
+  scale_fill_brewer(type="div", palette="BrBG") +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  annotate("text", label=annolab, x=simsum$EV, y=y) +
+  theme(legend.position="bottom")
 ```
 
 Print a table summarizing the simulated lotteries showing the mean and median selection probabilities and their standard deviations. Compare to probabilities given in the WSER 2014 [lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
@@ -188,25 +191,28 @@ Print a table summarizing the simulated lotteries showing the mean and median se
 require(xtable, quietly=TRUE)
 print(xtable(simsum), type="html", include.rownames=FALSE)
 ```
-My estimates and the probabilities calculated by WSER are essentially identical. Percent differences of the selection probabilities are never more than `r max(abs(simsum$"% diff."))`% and the mean squared error of the selection probabilities is `r sprintf("%.6f", mean(simsum$"Sq. error"))`.
+My estimates are slightly higher compared to the probabilities calculated by [WSER](http://www.wser.org/2013/11/27/2014-lottery-statistics) (*Mean* column versus the *Prob (WSER)* column). Presumably, the explanation is as described in the *Details* section above. Percent differences of the selection probabilities are never more than `r max(abs(simsum$"% diff."))`% and the mean squared error of the selection probabilities is `r sprintf("%.6f", mean(simsum$"Sq. error"))`.
 
-Plot the outcomes of a random sample of the `r format(size, big.mark=",")` simulated lotteries as a [waffle plot](http://www.improving-visualisation.org/vis/id=179). The width of each bar represents the number of selected runners. Blocks represent 10 runners.
+Plot the outcomes of a random sample of the `r format(size, big.mark=",")` simulated lotteries as a [waffle plot](http://www.improving-visualisation.org/vis/id=179). Each row is a single simulated lottery. The color segment in each row represents the number of selected runners in a ticket category. Each blocks represent 10 runners.
 ```{r PlotLotteryResults}
 s <- 25
+title <- sprintf("Simulated 2014 WSER Lotteries\nSample of %.0f Lotteries", s)
+xlab <- "Simulated lottery"
+ylab <- "Number of selected runners\nEach block represents 10 runners"
+filllab <- "Tickets"
 i <- sample(seq(1, size), s)
 frameSample <- frameLottery[frameLottery$sim %in% i, ]
 frameSample$sim <- factor(frameSample$sim)
 levels(frameSample$sim) <- rev(levels(frameSample$sim))
-g <- ggplot(frameSample, aes(x=sim, fill=tickets))
-g <- g + geom_bar(width=1)
-g <- g + geom_hline(y=seq(0, spots, 10), color="white")
-g <- g + geom_vline(x=seq(1, s)-0.5, color="white")
-g <- g + scale_fill_brewer(type="div", palette="BrBG")
-g <- g + scale_y_continuous(expand=c(0, 0))
-g <- g + labs(title=paste("Simulated 2014 WSER Lotteries\n", "Sample of", s, "Lotteries"), x="Simulated lottery", y="Number of selected runners", fill="Tickets")
-g <- g + coord_flip()
-g <- g + theme(legend.position="top")
-g
+ggplot(frameSample, aes(x=sim, fill=tickets)) +
+  geom_bar(width=1) +
+  geom_hline(y=seq(0, spots, 10), color="white") +
+  geom_vline(x=seq(1, s)-0.5, color="white") +
+  scale_fill_brewer(type="div", palette="BrBG") +
+  scale_y_continuous(expand=c(0, 0)) +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  coord_flip() +
+  theme(legend.position="top")
 ```
 
 
