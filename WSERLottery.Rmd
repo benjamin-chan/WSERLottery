@@ -1,116 +1,114 @@
-2014 Western States Endurance Run Lottery
-=========================================
-Last update by Benjamin Chan (<benjamin.ks.chan@gmail.com>) on `r paste(Sys.time())` using `r R.version.string`.
+---
+title: "2015 Western States Endurance Run Lottery"
+author: "Benjamin Chan (https://github.com/benjamin-chan/WSERLottery)"
+output:
+  ioslides_presentation: default
+---
 
 
-Details
--------
-From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html). **Use this table** for input data on the number entrants for each ticket count. The index of the vector will serve as the ticket count.
-
-> Total Tickets: 4307     Total Entrants: 2704  
->  
-> Last Updated: 12/05/2013 7:00AM PST  
->  
-> Ticket Count | Entrants| Tickets
-> -------------|---------|--------
->            5 |      52 |     260
->            4 |     106 |     424
->            3 |     258 |     774
->            2 |     561 |    1122
->            1 |    1727 |    1727
-
-```{r}
+```{r, echo=FALSE, results="hide"}
+# ENTRANTS
+# --------
+# From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html).
+# Input data on the number of entrants for each ticket count.
+# 
+# > Total Tickets: 4307     Total Entrants: 2704  
+# > 
+# > Last Updated: 12/05/2013 7:00AM PST  
 distn <- c(1727, 561, 258, 106, 52)
-```
-
-This information is different from what is shown on the [2014 lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics) page, which was posted on 12/5/2013, but shortly before the update above. I'm pretty sure any difference between my numbers and what's at the link above is that WSER runs their simulation before some entries get verified and corrected. **Use this table** for input data on the selection probabilities to compare my simulations to. 
-> Tickets | # of Entrants | Probability (%) | Expected # Selected | Expected % Selected  
-> --------|---------------|-----------------|---------------------|--------------------
->       1 |          1727 |             6.5 |               112.2 |                41.6  
->       2 |           561 |            12.6 |                70.6 |                26.1  
->       3 |           258 |            18.3 |                47.1 |                17.5  
->       4 |           106 |            23.6 |                25.0 |                 9.2  
->       5 |            53 |            28.5 |                15.1 |                 5.6  
->  Totals |          2705 |                 |               270.0 |               100.0
-
-```{r}
+#
+# Selection probabilities from WSER
+# ---------------------------------
+#  **Use this table** for input data on the selection probabilities to compare
+#  **my simulations to.
 probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)
-```
-
-Here, I run a simulation of the lottery process to estimate probabilities of winning a slot for the Western States Endurance Run. The simulation does a few things
-* Use the `sample` function in R to sample without replacement using the number of tickets each entrant has divided by the total number of tickets in the *hat* as each entrant's selection probability for a single draw
-* Select draws from the *hat* equal to the number of spots available
-* Repeat each *lottery* a number of times
-* Use the `aggregate` function to summarize the simulations and derive an emperical distribution of selection probabilities
-* Plot the selection probability distributions
-
-
-Set up initial conditions
--------------------------
-Here is the code to set up the lottery hat data frame at the initial state. Print out some validation output just to make sure the initial state is set up correctly.
-```{r Setup}
+#
+# Simulation
+# ----------
+# Here, I run a simulation of the lottery process to estimate probabilities of
+# winning a slot for the Western States Endurance Run. The simulation does a few
+# things
+# 
+# * Use the `sample` function in R to sample without replacement using the
+#   number of tickets each entrant has divided by the total number of tickets in
+#   the *hat* as each entrant's selection probability for a single draw
+# * Select draws from the *hat* equal to the number of spots available
+# * Repeat each *lottery* a number of times
+# * Use the `aggregate` function to summarize the simulations and derive an
+#   emperical distribution of selection probabilities
+# * Plot the selection probability distributions
+#
+# Set up initial conditions
+#--------------------------
+# Here is the code to set up the lottery hat data frame at the initial state.
+# Print out some validation output just to make sure the initial state is set up
+# correctly.
 spots <- 270
 applicants <- sum(distn)
 runner <- seq(1, applicants)
 tickets <- c(rep(5, distn[5]), rep(4, distn[4]), rep(3, distn[3]), rep(2, distn[2]), rep(1, distn[1]))
 frameHat <- data.frame(runner, tickets)
 frameHat$prob <- frameHat$tickets / sum(frameHat$tickets)
-addmargins(table(factor(frameHat$tickets)))
-head(frameHat)
-tail(frameHat)
-```
-
-
-Simulate lottery
-----------------
-The simulation needs to account for the changing relative distribution of tickets after a person is selected and their tickets are no longer in the pool of eligible tickets.
-
-The matrix `lottery` is an $I \times J$ matrix where row $i$ is the $i$-th simulation and the column $j$ is the $j$-th lottery winner drawn. The number of columns in the matrix is `r spots`, variable `spots`. The number of simulated lotteries is variable `size`. Set the random number seed as the date of the lottery in numeric form multipied by the number of applicants.
-```{r Simulation}
-size <- 100E3
-dateLottery <- as.Date("2013-12-07", format="%Y-%m-%d")
+addmargins(table(factor(frameHat$tickets)))  # Check for match with `distn` vector
+aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an individual draw
+# 
+# Simulate lottery
+# ----------------
+# The simulation needs to account for the changing relative distribution of
+# tickets after a person is selected and their tickets are no longer in the pool
+# of eligible tickets.
+# 
+# The matrix `lottery` is an $I \times J$ matrix where row $i$ is the $i$-th
+# simulation and the column $j$ is the $j$-th lottery winner drawn. The number
+# of columns in the matrix is `r spots`, variable `spots`. The number of
+# simulated lotteries is variable `size`. Set the random number seed as the date
+# of the lottery in numeric form multipied by the number of applicants.
+size <- 1E3  # Use 1E5 for production, 1E3 for testing
+dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")
 set.seed(as.numeric(dateLottery) * applicants)
 lottery <- matrix(nrow=size, ncol=spots)
 system.time(
   for (i in 1:size) {
     lottery[i, ] <- sample(frameHat$runner, spots, prob=frameHat$prob)
   })
-```
-
-Here's an example of the selected runners drawn from a random simulated lottery.
-```{r RandomLotteryResult}
+#
+# One simulated lottery
+# ---------------------
 i <- sample(seq(1, size), 1)
 sampLottery <- list(i, sort(lottery[i, ]))
 names(sampLottery) <- c("lottery", "runner")
 sampLottery
-```
-Here's the distribution of the category of ticket holders from that random simulated lottery.
-```{r RandomLotteryDistn}
+# 
+# Here's the distribution of the category of ticket holders from that random
+# simulated lottery.
 addmargins(table(frameHat$tickets[sampLottery$runner]))
-```
-I.e., in simulated lottery `r i`, 
-* `r sum(frameHat$tickets[sampLottery$runner] == 1)` applicants with 1 ticket were selected  (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 1) / distn[1], digits=2)`%)
-* `r sum(frameHat$tickets[sampLottery$runner] == 2)` applicants with 2 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 2) / distn[2], digits=2)`%)
-* `r sum(frameHat$tickets[sampLottery$runner] == 3)` applicants with 3 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 3) / distn[3], digits=2)`%)
-* `r sum(frameHat$tickets[sampLottery$runner] == 4)` applicants with 4 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 4) / distn[4], digits=2)`%)
-* `r sum(frameHat$tickets[sampLottery$runner] == 5)` applicants with 5 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 5) / distn[5], digits=2)`%)
-
-Okay... but what happened with the other `r size - 1` simulated lotteries?
-
-
-Format lottery simulation data
-------------------------------
-I'm not really interested in which runners were selected in the lottery simulation. What I'm really after are estimates for the probability of selecting a runner, among the `r spots` available spots, with $X$ tickets in the initial hat.
-
-To get at this, first I'll have to match the runners selected to the number of tickets they started out with.
-```{r MatchTickets}
+# 
+# I.e., in simulated lottery `r i`, 
+# * `r sum(frameHat$tickets[sampLottery$runner] == 1)` applicants with 1 ticket were selected  (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 1) / distn[1], digits=2)`%)
+# * `r sum(frameHat$tickets[sampLottery$runner] == 2)` applicants with 2 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 2) / distn[2], digits=2)`%)
+# * `r sum(frameHat$tickets[sampLottery$runner] == 3)` applicants with 3 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 3) / distn[3], digits=2)`%)
+# * `r sum(frameHat$tickets[sampLottery$runner] == 4)` applicants with 4 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 4) / distn[4], digits=2)`%)
+# * `r sum(frameHat$tickets[sampLottery$runner] == 5)` applicants with 5 tickets were selected (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 5) / distn[5], digits=2)`%)
+# 
+# Okay... but what happened with the other `r size - 1` simulated lotteries?
+# 
+# Format lottery simulation data
+# ------------------------------
+# I'm not really interested in which runners were selected in the lottery
+# simulation. What I'm really after are estimates for the probability of
+# selecting a runner, among the `r spots` available spots, with $X$ tickets in
+# the initial hat.
+# 
+# To get at this, first I'll have to match the runners selected to the number of
+# tickets they started out with.
 lottery2 <- matrix(nrow=size, ncol=spots)
 for (i in 1:size) {
   lottery2[i, ] <- frameHat$tickets[lottery[i, ]]
 }
-```
-Reformat the `lottery2` matrix to an aggregated data frame for analysis.
-```{r ReformatMatrix}
+#
+# Format lottery simulation data
+# ------------------------------
+# Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 tickets <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
 frameLottery <- data.frame(sim, tickets)
@@ -119,14 +117,16 @@ sim <- rep(seq(1, size), each=5)
 tickets <- factor(rep(seq(1, 5), size))
 freq <- as.vector(t(aggLottery$tickets))
 frameSummary <- data.frame(sim, tickets, freq)
-```
-Save the aggregated data frame for other analysis.
-```{r Save}
+# 
+# Format lottery simulation data
+# ------------------------------
+# Save the aggregated data frame for other analysis.
 save(aggLottery, file="aggLottery.RData")
-```
-
-For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the proportion of selected applicants. 
-```{r Probabilities}
+# 
+# Format lottery simulation data
+# ------------------------------
+# For each type of lottery applicant (1 ticket, 2 tickets, etc.), calculate the
+# proportion of selected applicants.
 total <- rep(distn, size)
 frameSummary$prob <- 100 * (frameSummary$freq / total)
 aggFx <- function(x) {c(mean = mean(x), median = median(x), sd = sd(x))}
@@ -139,12 +139,17 @@ pctdiff <- 100 * diffprob / aggProb[, "prob"][, "mean"]
 sqerr <- diffprob ^2
 simsum <- data.frame(tickets = aggProb[, "tickets"], distn, mean = aggProb[, "prob"][, "mean"], ev, probWSER, evWSER, diffprob, diffev, pctdiff, sqerr)
 names(simsum) <- c("Tickets", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Diff. prob.", "Diff. EV", "% diff.", "Sq. error")
+#
+# Summarize lottery simulations
+# -----------------------------
+# Plot the distribution of probabilities from the `r format(size, big.mark=",")`
+# simulated lotteries.
 ```
 
-Summarize lottery simulations
------------------------------
-Plot the distribution of probabilities from the `r format(size, big.mark=",")` simulated lotteries. Annotate with the estimated mean selection probability.
-```{r PlotProbabilities}
+
+## Selection probabilities
+
+```{r PlotProbabilities, echo=FALSE}
 title <- "2014 WSER Lottery Selection Probability Densities"
 xlab <- "Probability of selection"
 ylab <- paste("Proportion of", format(size, big.mark=","), "simulations")
@@ -159,15 +164,27 @@ y <- c(y1, y2, y3, y4, y5)
 require(ggplot2, quietly=TRUE)
 ggplot(frameSummary, aes(x=prob, y=..density.., fill=tickets)) +
   geom_density(alpha=1/2, color=NA) +
-  scale_fill_brewer(type="div", palette="BrBG") +
+  scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$Mean, y=y) +
   theme(legend.position="bottom")
 ```
-As expected, the spread of the selection probabilities increases as the number of tickets a person has in the hat increases (the variance of a binomial random variable increases with $p$).
 
-Another way to think about the lottery is to plot the distribution of the frequency of runners selected by number of tickets. Annotate with the estimated expected value.
-```{r PlotFrequencies}
+```{r, echo=FALSE, results="hide"}
+# As expected, the spread of the selection probabilities increases as the number
+# of tickets a person has in the hat increases (the variance of a binomial
+# random variable increases with $p$).
+# 
+# Summarize lottery simulations
+# -----------------------------
+# Another way to think about the lottery is to plot the distribution of the
+# frequency of runners selected by number of tickets.
+```
+
+
+## Selection distributions
+
+```{r PlotFrequencies, echo=FALSE}
 title <- "2014 WSER Lottery Selection Distribution Densities"
 xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=","), "simulations")
@@ -181,21 +198,35 @@ y5 <- max(density(frameSummary$freq[frameSummary$tickets == 5])$y)
 y <- c(y1, y2, y3, y4, y5)
 ggplot(frameSummary, aes(x=freq, y=..density.., fill=tickets)) +
   geom_density(alpha=1/2, color=NA) +
-  scale_fill_brewer(type="div", palette="BrBG") +
+  scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$EV, y=y) +
   theme(legend.position="bottom")
 ```
 
-Print a table summarizing the simulated lotteries showing the mean and median selection probabilities and their standard deviations. Compare to probabilities given in the WSER 2014 [lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
-```{r Table, results='asis'}
+```{r, echo=FALSE, results="hide"}
+# Summarize lottery simulations
+# -----------------------------
+# Compare to probabilities given in the WSER 2014 [lottery
+# statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
 require(xtable, quietly=TRUE)
 print(xtable(simsum), type="html", include.rownames=FALSE)
+#
+# My estimates are *virtually identical* to the probabilities calculated by
+# [WSER](http://www.wser.org/2013/11/27/2014-lottery-statistics) (*Mean* column
+# versus the *Prob (WSER)* column). Percent differences of the selection
+# probabilities are never more than `r max(abs(simsum$"% diff."))`% and the mean
+# squared error of the selection probabilities is `r sprintf("%.6f",
+# mean(simsum$"Sq. error"))`.
+# 
+# Outcome of sample of lotteries
+# ------------------------------
 ```
-My estimates are *virtually identical* to the probabilities calculated by [WSER](http://www.wser.org/2013/11/27/2014-lottery-statistics) (*Mean* column versus the *Prob (WSER)* column). Percent differences of the selection probabilities are never more than `r max(abs(simsum$"% diff."))`% and the mean squared error of the selection probabilities is `r sprintf("%.6f", mean(simsum$"Sq. error"))`.
 
-Plot the outcomes of a random sample of the `r format(size, big.mark=",")` simulated lotteries as a [waffle plot](http://www.improving-visualisation.org/vis/id=179). Each row is a single simulated lottery. The color segment in each row represents the number of selected runners in a ticket category. Each blocks represent 10 runners.
-```{r PlotLotteryResults}
+
+## Sample of simulated lotteries
+
+```{r, echo=FALSE, results="asis"}
 s <- 25
 title <- sprintf("Simulated 2014 WSER Lotteries\nSample of %.0f Lotteries", s)
 xlab <- "Simulated lottery"
@@ -209,36 +240,42 @@ ggplot(frameSample, aes(x=sim, fill=tickets)) +
   geom_bar(width=1) +
   geom_hline(y=seq(0, spots, 10), color="white") +
   geom_vline(x=seq(1, s)-0.5, color="white") +
-  scale_fill_brewer(type="div", palette="BrBG") +
+  scale_fill_brewer(palette="Spectral") +
   scale_y_continuous(expand=c(0, 0)) +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   coord_flip() +
   theme(legend.position="top")
 ```
 
-
-Actual results
---------------
-The actual lottery was held on December 7, 2012. Here are the results, from the Western States Endurance Run [Facebook post](https://www.facebook.com/permalink.php?story_fbid=10152053026305412&id=293403870411),
-
-> Congratulations to all those chosen in the lottery today. Here are some stats for the ticket groups of the 270 selected (and predicted by our MC simulations)  
-> one ticket - 101 selected (112 predicted))  
-> two tickets - 78 (70)  
-> three tickets - 45 (47)  
-> four tickets -27 (25)  
-> five tickets - 19 (15)  
-
-Compare the observed lottery to the expected lottery.
-```{r ObsCompare, results='asis'}
+```{r, echo=FALSE, results="hide"}
+# 
+# Actual results
+# --------------
+# The actual lottery was held on December 7, 2012. Here are the results, from
+# the Western States Endurance Run [Facebook post](https://www.facebook.com/perm
+# alink.php?story_fbid=10152053026305412&id=293403870411),
+# 
+# > Congratulations to all those chosen in the lottery today. Here are some
+# > stats for the ticket groups of the 270 selected (and predicted by our MC
+# > simulations)
+# > one ticket - 101 selected (112 predicted))  
+# > two tickets - 78 (70)  
+# > three tickets - 45 (47)  
+# > four tickets -27 (25)  
+# > five tickets - 19 (15)  
+# 
+# Actual results
+# --------------
+# Compare the observed lottery to the expected lottery.
 yObs <- c(101, 78, 45, 27, 19)
 yExp <- simsum$EV
 frameObsExp <- data.frame(yObs, yExp, diff=yObs - yExp)
 names(frameObsExp) <- c("Observed", "Expected", "Difference")
 print(xtable(frameObsExp), type="html", include.rownames=FALSE)
-```
-
-I wonder how many times this outcome appeared in my simulated lotteries?
-```{r SimObserved}
+# 
+# Actual results
+# --------------
+# I wonder how many times this outcome appeared in my simulated lotteries?
 y1 <- aggLottery$tickets[,1] == yObs[1]
 y2 <- aggLottery$tickets[,2] == yObs[2]
 y3 <- aggLottery$tickets[,3] == yObs[3]
@@ -246,5 +283,26 @@ y4 <- aggLottery$tickets[,4] == yObs[4]
 y5 <- aggLottery$tickets[,5] == yObs[5]
 y <- y1 & y2 & y3 & y4 & y5
 aggLottery[y,]
+# 
+# Of the `r format(size, big.mark=",")` simulated lotteries, only `r sum(y)`, or
+# `r sprintf("%.5f%%", 100 * sum(y) / size)`, matched the exact outcome of the
+# actual lottery.
 ```
-Of the `r format(size, big.mark=",")` simulated lotteries, only `r sum(y)`, or `r sprintf("%.5f%%", 100 * sum(y) / size)`, matched the exact outcome of the actual lottery.
+
+
+## Details
+
+Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository for the gory details.
+
+
+## Session info
+
+```{r, echo=FALSE}
+message(sprintf("Run time: %s", Sys.time()))
+```
+
+## Session info {.smaller}
+
+```{r, echo=FALSE}
+sessionInfo()
+```
