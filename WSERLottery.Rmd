@@ -7,22 +7,17 @@ output:
 
 
 ```{r, echo=FALSE, results="hide"}
-# ENTRANTS
-# --------
-# From the [2014 WSER lottery page](http://www.wser.org/lottery2014.html).
-# Input data on the number of entrants for each ticket count.
-# 
-# > Total Tickets: 4307     Total Entrants: 2704  
-# > 
-# > Last Updated: 12/05/2013 7:00AM PST  
-distn <- c(1727, 561, 258, 106, 52)
-#
-# Selection probabilities from WSER
-# ---------------------------------
-#  **Use this table** for input data on the selection probabilities to compare
-#  **my simulations to.
-probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)
-#
+# PARAMETERS TO UPDATE
+#---------------------
+distn <- c(1727, 561, 258, 106, 52)  # Number of entrants for each ticket count
+probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)  # Selection probabilities from WSER
+spots <- 270  # Number of spots up for grabs
+size <- 1E5  # Use 1E6 for production, 1E3 for testing
+dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
+```
+
+
+```{r, echo=FALSE, results="hide"}
 # Simulation
 # ----------
 # Here, I run a simulation of the lottery process to estimate probabilities of
@@ -43,7 +38,6 @@ probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)
 # Here is the code to set up the lottery hat data frame at the initial state.
 # Print out some validation output just to make sure the initial state is set up
 # correctly.
-spots <- 270
 applicants <- sum(distn)
 runner <- seq(1, applicants)
 tickets <- c(rep(5, distn[5]), rep(4, distn[4]), rep(3, distn[3]), rep(2, distn[2]), rep(1, distn[1]))
@@ -63,14 +57,18 @@ aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an i
 # of columns in the matrix is `r spots`, variable `spots`. The number of
 # simulated lotteries is variable `size`. Set the random number seed as the date
 # of the lottery in numeric form multipied by the number of applicants.
-size <- 1E3  # Use 1E5 for production, 1E3 for testing
-dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")
 set.seed(as.numeric(dateLottery) * applicants)
-lottery <- matrix(nrow=size, ncol=spots)
-system.time(
-  for (i in 1:size) {
-    lottery[i, ] <- sample(frameHat$runner, spots, prob=frameHat$prob)
-  })
+require(parallel)
+require(doParallel)
+cores <- min(detectCores(), 4)
+cl <- makeCluster(cores)
+registerDoParallel(cl)
+simTime <- system.time(
+  lottery <- foreach (i=1:size, .combine=rbind) %dopar% {
+    sample(frameHat$runner, spots, prob=frameHat$prob)
+  }
+)
+stopCluster(cl)
 #
 # One simulated lottery
 # ---------------------
@@ -101,10 +99,16 @@ addmargins(table(frameHat$tickets[sampLottery$runner]))
 # 
 # To get at this, first I'll have to match the runners selected to the number of
 # tickets they started out with.
-lottery2 <- matrix(nrow=size, ncol=spots)
-for (i in 1:size) {
-  lottery2[i, ] <- frameHat$tickets[lottery[i, ]]
+# lottery2 <- matrix(nrow=size, ncol=spots)
+# for (i in 1:size) {
+#   lottery2[i, ] <- frameHat$tickets[lottery[i, ]]
+# }
+cl <- makeCluster(cores)
+registerDoParallel(cl)
+lottery2 <- foreach (i=1:size, .combine=rbind) %dopar% {
+  frameHat$tickets[lottery[i, ]]
 }
+stopCluster(cl)
 #
 # Format lottery simulation data
 # ------------------------------
@@ -112,11 +116,27 @@ for (i in 1:size) {
 tickets <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
 frameLottery <- data.frame(sim, tickets)
-system.time(aggLottery <- aggregate(tickets ~ sim, frameLottery, table))
+require(data.table)
+frameLottery <- data.table(frameLottery)
+aggTime <- system.time(
+  aggLottery <- frameLottery[,
+                             list(tickets.1 = sum(tickets == 1),
+                                  tickets.2 = sum(tickets == 2),
+                                  tickets.3 = sum(tickets == 3),
+                                  tickets.4 = sum(tickets == 4),
+                                  tickets.5 = sum(tickets == 5)),
+                             sim]
+)
 sim <- rep(seq(1, size), each=5)
 tickets <- factor(rep(seq(1, 5), size))
-freq <- as.vector(t(aggLottery$tickets))
+freq <- as.vector(t(aggLottery[, list(tickets.1, tickets.2, tickets.3, tickets.4, tickets.5)]))
 frameSummary <- data.frame(sim, tickets, freq)
+require(reshape2)
+frameSummary <- melt(aggLottery, id.vars=c("sim"))
+frameSummary$tickets <- factor(gsub("tickets\\.", "", frameSummary$variable))
+frameSummary$freq <- frameSummary$value
+frameSummary[, c("variable", "value")] <- NULL
+frameSummary <- frameSummary[order(frameSummary$sim, frameSummary$tickets)]
 # 
 # Format lottery simulation data
 # ------------------------------
@@ -147,12 +167,12 @@ names(simsum) <- c("Tickets", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Di
 ```
 
 
-## Selection probabilities
+## Probability of selection
 
 ```{r PlotProbabilities, echo=FALSE}
-title <- "2014 WSER Lottery Selection Probability Densities"
+title <- sprintf("%.0d WSER Lottery Selection Probability Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Probability of selection"
-ylab <- paste("Proportion of", format(size, big.mark=","), "simulations")
+ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Tickets"
 annolab <- sprintf("%.2f%%", simsum$Mean)
 y1 <- max(density(frameSummary$prob[frameSummary$tickets == 1])$y)
@@ -182,12 +202,12 @@ ggplot(frameSummary, aes(x=prob, y=..density.., fill=tickets)) +
 ```
 
 
-## Selection distributions
+## Number of entrants
 
 ```{r PlotFrequencies, echo=FALSE}
-title <- "2014 WSER Lottery Selection Distribution Densities"
+title <- sprintf("%.0d WSER Lottery Selection Distribution Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Number of entrants selected"
-ylab <- paste("Proportion of", format(size, big.mark=","), "simulations")
+ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Tickets"
 annolab <- sprintf("%.1f", simsum$EV)
 y1 <- max(density(frameSummary$freq[frameSummary$tickets == 1])$y)
@@ -228,7 +248,7 @@ print(xtable(simsum), type="html", include.rownames=FALSE)
 
 ```{r, echo=FALSE, results="asis"}
 s <- 25
-title <- sprintf("Simulated 2014 WSER Lotteries\nSample of %.0f Lotteries", s)
+title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
 xlab <- "Simulated lottery"
 ylab <- "Number of selected runners\nEach block represents 10 runners"
 filllab <- "Tickets"
@@ -298,11 +318,21 @@ Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository 
 ## Session info
 
 ```{r, echo=FALSE}
-message(sprintf("Run time: %s", Sys.time()))
+message(sprintf("Timestamp: %s", Sys.time()))
+message(sprintf("Number of cores used in simulation: %.0d", cores))
+message(sprintf("Random number seed: %.0d", as.numeric(dateLottery) * applicants))
+message(sprintf("Elapsed time of simulation: %.3f minutes", simTime[3] / 60))
+message(sprintf("Elapsed time of aggregation: %.3f minutes", aggTime[3] / 60))
 ```
 
 ## Session info {.smaller}
 
 ```{r, echo=FALSE}
-sessionInfo()
+print(sessionInfo(), locale=FALSE)
+```
+
+## System info {.smaller}
+
+```{r, echo=FALSE}
+Sys.info()
 ```
