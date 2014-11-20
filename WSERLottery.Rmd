@@ -12,7 +12,7 @@ output:
 distn <- c(1727, 561, 258, 106, 52)  # Number of entrants for each ticket count
 probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
-size <- 1E3  # Use 1E6 for production, 1E3 for testing
+size <- 1E5  # Use 1E6 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
