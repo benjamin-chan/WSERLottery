@@ -12,7 +12,7 @@ output:
 distn <- c(1727, 561, 258, 106, 52)  # Number of entrants for each ticket count
 probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
-size <- 1E5  # Use 1E6 for production, 1E3 for testing
+size <- 1E3  # Use 1E6 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
@@ -40,8 +40,13 @@ dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; u
 # correctly.
 applicants <- sum(distn)
 runner <- seq(1, applicants)
-tickets <- c(rep(5, distn[5]), rep(4, distn[4]), rep(3, distn[3]), rep(2, distn[2]), rep(1, distn[1]))
-frameHat <- data.frame(runner, tickets)
+confail <- c(rep(4, distn[5]),
+             rep(3, distn[4]),
+             rep(2, distn[3]),
+             rep(1, distn[2]),
+             rep(0, distn[1]))
+tickets <- 2^confail
+frameHat <- data.frame(runner, confail, tickets)
 frameHat$prob <- frameHat$tickets / sum(frameHat$tickets)
 addmargins(table(factor(frameHat$tickets)))  # Check for match with `distn` vector
 aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an individual draw
@@ -79,7 +84,7 @@ sampLottery
 # 
 # Here's the distribution of the category of ticket holders from that random
 # simulated lottery.
-addmargins(table(frameHat$tickets[sampLottery$runner]))
+addmargins(table(frameHat$confail[sampLottery$runner]))
 # 
 # I.e., in simulated lottery `r i`, 
 # * `r sum(frameHat$tickets[sampLottery$runner] == 1)` applicants with 1 ticket were selected  (`r format(100 * sum(frameHat$tickets[sampLottery$runner] == 1) / distn[1], digits=2)`%)
@@ -106,37 +111,37 @@ addmargins(table(frameHat$tickets[sampLottery$runner]))
 cl <- makeCluster(cores)
 registerDoParallel(cl)
 lottery2 <- foreach (i=1:size, .combine=rbind) %dopar% {
-  frameHat$tickets[lottery[i, ]]
+  frameHat$confail[lottery[i, ]]
 }
 stopCluster(cl)
 #
 # Format lottery simulation data
 # ------------------------------
 # Reformat the `lottery2` matrix to an aggregated data frame for analysis.
-tickets <- factor(as.vector(t(lottery2)))
+confail <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
-frameLottery <- data.frame(sim, tickets)
+frameLottery <- data.frame(sim, confail)
 require(data.table)
 frameLottery <- data.table(frameLottery)
 aggTime <- system.time(
   aggLottery <- frameLottery[,
-                             list(tickets.1 = sum(tickets == 1),
-                                  tickets.2 = sum(tickets == 2),
-                                  tickets.3 = sum(tickets == 3),
-                                  tickets.4 = sum(tickets == 4),
-                                  tickets.5 = sum(tickets == 5)),
+                             list(confail.0 = sum(confail == 0),
+                                  confail.1 = sum(confail == 1),
+                                  confail.2 = sum(confail == 2),
+                                  confail.3 = sum(confail == 3),
+                                  confail.4 = sum(confail == 4)),
                              sim]
 )
 sim <- rep(seq(1, size), each=5)
-tickets <- factor(rep(seq(1, 5), size))
-freq <- as.vector(t(aggLottery[, list(tickets.1, tickets.2, tickets.3, tickets.4, tickets.5)]))
-frameSummary <- data.frame(sim, tickets, freq)
+confail <- factor(rep(seq(1, 5), size))
+freq <- as.vector(t(aggLottery[, list(confail.0, confail.1, confail.2, confail.3, confail.4)]))
+frameSummary <- data.frame(sim, confail, freq)
 require(reshape2)
 frameSummary <- melt(aggLottery, id.vars=c("sim"))
-frameSummary$tickets <- factor(gsub("tickets\\.", "", frameSummary$variable))
+frameSummary$confail <- factor(gsub("confail\\.", "", frameSummary$variable))
 frameSummary$freq <- frameSummary$value
 frameSummary[, c("variable", "value")] <- NULL
-frameSummary <- frameSummary[order(frameSummary$sim, frameSummary$tickets)]
+frameSummary <- frameSummary[order(frameSummary$sim, frameSummary$confail)]
 # 
 # Format lottery simulation data
 # ------------------------------
@@ -150,15 +155,15 @@ save(aggLottery, file="aggLottery.RData")
 total <- rep(distn, size)
 frameSummary$prob <- 100 * (frameSummary$freq / total)
 aggFx <- function(x) {c(mean = mean(x), median = median(x), sd = sd(x))}
-aggProb <- aggregate(prob ~ tickets, frameSummary, aggFx)
+aggProb <- aggregate(prob ~ confail, frameSummary, aggFx)
 ev <- distn * aggProb[, "prob"][, "mean"] / 100
 evWSER <- distn * probWSER / 100
 diffprob <- aggProb[, "prob"][, "mean"] - probWSER
 diffev <- ev - evWSER
 pctdiff <- 100 * diffprob / aggProb[, "prob"][, "mean"]
 sqerr <- diffprob ^2
-simsum <- data.frame(tickets = aggProb[, "tickets"], distn, mean = aggProb[, "prob"][, "mean"], ev, probWSER, evWSER, diffprob, diffev, pctdiff, sqerr)
-names(simsum) <- c("Tickets", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Diff. prob.", "Diff. EV", "% diff.", "Sq. error")
+simsum <- data.frame(confail = aggProb[, "confail"], distn, mean = aggProb[, "prob"][, "mean"], ev, probWSER, evWSER, diffprob, diffev, pctdiff, sqerr)
+names(simsum) <- c("Consec. Failures", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Diff. prob.", "Diff. EV", "% diff.", "Sq. error")
 #
 # Summarize lottery simulations
 # -----------------------------
@@ -173,16 +178,16 @@ names(simsum) <- c("Tickets", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Di
 title <- sprintf("%.0d WSER Lottery Selection Probability Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Probability of selection"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
-filllab <- "Tickets"
+filllab <- "Consecutive failures"
 annolab <- sprintf("%.2f%%", simsum$Mean)
-y1 <- max(density(frameSummary$prob[frameSummary$tickets == 1])$y)
-y2 <- max(density(frameSummary$prob[frameSummary$tickets == 2])$y)
-y3 <- max(density(frameSummary$prob[frameSummary$tickets == 3])$y)
-y4 <- max(density(frameSummary$prob[frameSummary$tickets == 4])$y)
-y5 <- max(density(frameSummary$prob[frameSummary$tickets == 5])$y)
+y1 <- max(density(frameSummary$prob[frameSummary$confail == 0])$y)
+y2 <- max(density(frameSummary$prob[frameSummary$confail == 1])$y)
+y3 <- max(density(frameSummary$prob[frameSummary$confail == 2])$y)
+y4 <- max(density(frameSummary$prob[frameSummary$confail == 3])$y)
+y5 <- max(density(frameSummary$prob[frameSummary$confail == 4])$y)
 y <- c(y1, y2, y3, y4, y5)
 require(ggplot2, quietly=TRUE)
-ggplot(frameSummary, aes(x=prob, y=..density.., fill=tickets)) +
+ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
@@ -208,15 +213,15 @@ ggplot(frameSummary, aes(x=prob, y=..density.., fill=tickets)) +
 title <- sprintf("%.0d WSER Lottery Selection Distribution Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
-filllab <- "Tickets"
+filllab <- "Consecutive failures"
 annolab <- sprintf("%.1f", simsum$EV)
-y1 <- max(density(frameSummary$freq[frameSummary$tickets == 1])$y)
-y2 <- max(density(frameSummary$freq[frameSummary$tickets == 2])$y)
-y3 <- max(density(frameSummary$freq[frameSummary$tickets == 3])$y)
-y4 <- max(density(frameSummary$freq[frameSummary$tickets == 4])$y)
-y5 <- max(density(frameSummary$freq[frameSummary$tickets == 5])$y)
+y1 <- max(density(frameSummary$freq[frameSummary$confail == 0])$y)
+y2 <- max(density(frameSummary$freq[frameSummary$confail == 1])$y)
+y3 <- max(density(frameSummary$freq[frameSummary$confail == 2])$y)
+y4 <- max(density(frameSummary$freq[frameSummary$confail == 3])$y)
+y5 <- max(density(frameSummary$freq[frameSummary$confail == 4])$y)
 y <- c(y1, y2, y3, y4, y5)
-ggplot(frameSummary, aes(x=freq, y=..density.., fill=tickets)) +
+ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
@@ -251,12 +256,12 @@ s <- 25
 title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
 xlab <- "Simulated lottery"
 ylab <- "Number of selected runners\nEach block represents 10 runners"
-filllab <- "Tickets"
+filllab <- "Consecutive failures"
 i <- sample(seq(1, size), s)
 frameSample <- frameLottery[frameLottery$sim %in% i, ]
 frameSample$sim <- factor(frameSample$sim)
 levels(frameSample$sim) <- rev(levels(frameSample$sim))
-ggplot(frameSample, aes(x=sim, fill=tickets)) +
+ggplot(frameSample, aes(x=sim, fill=confail)) +
   geom_bar(width=1) +
   geom_hline(y=seq(0, spots, 10), color="white") +
   geom_vline(x=seq(1, s)-0.5, color="white") +
@@ -296,11 +301,11 @@ print(xtable(frameObsExp), type="html", include.rownames=FALSE)
 # Actual results
 # --------------
 # I wonder how many times this outcome appeared in my simulated lotteries?
-y1 <- aggLottery$tickets[,1] == yObs[1]
-y2 <- aggLottery$tickets[,2] == yObs[2]
-y3 <- aggLottery$tickets[,3] == yObs[3]
-y4 <- aggLottery$tickets[,4] == yObs[4]
-y5 <- aggLottery$tickets[,5] == yObs[5]
+y1 <- aggLottery$confail[,1] == yObs[1]
+y2 <- aggLottery$confail[,2] == yObs[2]
+y3 <- aggLottery$confail[,3] == yObs[3]
+y4 <- aggLottery$confail[,4] == yObs[4]
+y5 <- aggLottery$confail[,5] == yObs[5]
 y <- y1 & y2 & y3 & y4 & y5
 aggLottery[y,]
 # 
