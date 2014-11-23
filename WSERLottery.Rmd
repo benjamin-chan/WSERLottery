@@ -8,9 +8,15 @@ output:
 
 ```{r, echo=FALSE, results="hide"}
 # PARAMETERS TO UPDATE
-#---------------------
-distn <- c(1727, 561, 258, 106, 52)  # Number of entrants for each ticket count
-probWSER <- c(6.5, 12.6, 18.3, 23.6, 28.5)  # Selection probabilities from WSER
+# ---------------------
+# 26 folks with 32 tickets, each has a 78.1% chance of getting drawn
+# 58 folks with 16 tickets, each has a 53.1% chance of getting drawn
+# 143 folks with 8 tickets, each has a 31.5% chance of getting drawn
+# 285 folks with 4 tickets, each has a 17.3% chance of getting drawn
+# 658 folks with 2 tickets, each has a 9.0% chance of getting drawn
+# 1409 folks with 1 ticket, each has a 4.6% chance of getting drawn
+distn <- c(1409, 658, 285, 143, 58, 26)  # Number of entrants for each ticket count
+probWSER <- c(4.6, 9.0, 17.3, 31.5, 53.1, 78.1)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
 size <- 1E5  # Use 1E6 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
@@ -40,7 +46,8 @@ dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; u
 # correctly.
 applicants <- sum(distn)
 runner <- seq(1, applicants)
-confail <- c(rep(4, distn[5]),
+confail <- c(rep(5, distn[6]),
+             rep(4, distn[5]),
              rep(3, distn[4]),
              rep(2, distn[3]),
              rep(1, distn[2]),
@@ -129,12 +136,14 @@ aggTime <- system.time(
                                   confail.1 = sum(confail == 1),
                                   confail.2 = sum(confail == 2),
                                   confail.3 = sum(confail == 3),
-                                  confail.4 = sum(confail == 4)),
+                                  confail.4 = sum(confail == 4),
+                                  confail.5 = sum(confail == 5)),
                              sim]
 )
-sim <- rep(seq(1, size), each=5)
-confail <- factor(rep(seq(1, 5), size))
-freq <- as.vector(t(aggLottery[, list(confail.0, confail.1, confail.2, confail.3, confail.4)]))
+nlev <- nlevels(frameLottery$confail)
+sim <- rep(seq(1, size), each=nlev)
+confail <- factor(rep(seq(1, nlev), size))
+freq <- as.vector(t(aggLottery[, list(confail.0, confail.1, confail.2, confail.3, confail.4, confail.5)]))
 frameSummary <- data.frame(sim, confail, freq)
 require(reshape2)
 frameSummary <- melt(aggLottery, id.vars=c("sim"))
@@ -180,12 +189,13 @@ xlab <- "Probability of selection"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Consecutive failures"
 annolab <- sprintf("%.2f%%", simsum$Mean)
-y1 <- max(density(frameSummary$prob[frameSummary$confail == 0])$y)
-y2 <- max(density(frameSummary$prob[frameSummary$confail == 1])$y)
-y3 <- max(density(frameSummary$prob[frameSummary$confail == 2])$y)
-y4 <- max(density(frameSummary$prob[frameSummary$confail == 3])$y)
-y5 <- max(density(frameSummary$prob[frameSummary$confail == 4])$y)
-y <- c(y1, y2, y3, y4, y5)
+y0 <- max(density(frameSummary$prob[frameSummary$confail == 0])$y)
+y1 <- max(density(frameSummary$prob[frameSummary$confail == 1])$y)
+y2 <- max(density(frameSummary$prob[frameSummary$confail == 2])$y)
+y3 <- max(density(frameSummary$prob[frameSummary$confail == 3])$y)
+y4 <- max(density(frameSummary$prob[frameSummary$confail == 4])$y)
+y5 <- max(density(frameSummary$prob[frameSummary$confail == 5])$y)
+y <- c(y0, y1, y2, y3, y4, y5)
 require(ggplot2, quietly=TRUE)
 ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
@@ -215,12 +225,13 @@ xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Consecutive failures"
 annolab <- sprintf("%.1f", simsum$EV)
-y1 <- max(density(frameSummary$freq[frameSummary$confail == 0])$y)
-y2 <- max(density(frameSummary$freq[frameSummary$confail == 1])$y)
-y3 <- max(density(frameSummary$freq[frameSummary$confail == 2])$y)
-y4 <- max(density(frameSummary$freq[frameSummary$confail == 3])$y)
-y5 <- max(density(frameSummary$freq[frameSummary$confail == 4])$y)
-y <- c(y1, y2, y3, y4, y5)
+y0 <- max(density(frameSummary$freq[frameSummary$confail == 0])$y)
+y1 <- max(density(frameSummary$freq[frameSummary$confail == 1])$y)
+y2 <- max(density(frameSummary$freq[frameSummary$confail == 2])$y)
+y3 <- max(density(frameSummary$freq[frameSummary$confail == 3])$y)
+y4 <- max(density(frameSummary$freq[frameSummary$confail == 4])$y)
+y5 <- max(density(frameSummary$freq[frameSummary$confail == 5])$y)
+y <- c(y0, y1, y2, y3, y4, y5)
 ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
@@ -272,7 +283,7 @@ ggplot(frameSample, aes(x=sim, fill=confail)) +
   theme(legend.position="top")
 ```
 
-```{r, echo=FALSE, results="hide"}
+```{r, eval=FALSE, echo=FALSE, results="hide"}
 # 
 # Actual results
 # --------------
