@@ -18,7 +18,7 @@ output:
 distn <- c(1409, 658, 285, 143, 58, 26)  # Number of entrants for each ticket count
 probWSER <- c(4.6, 9.0, 17.3, 31.5, 53.1, 78.1)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
-size <- 1E5  # Use 1E6 for production, 1E3 for testing
+size <- 2.5E5  # Use 1E6 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
@@ -281,6 +281,16 @@ ggplot(frameSample, aes(x=sim, fill=confail)) +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   coord_flip() +
   theme(legend.position="top")
+```
+
+## Most likely scenarios
+
+```{r, echo=FALSE, results="asis"}
+scenarios <- aggLottery[, .N, list(confail.0, confail.1, confail.2, confail.3, confail.4, confail.5)]
+scenarios <- scenarios[, prop := N / size]
+mostLikely <- scenarios[N == max(scenarios[, N])]
+setnames(mostLikely, names(mostLikely), c(2 ^ seq(0, nlev - 1), "N", "Prop."))
+print(xtable(mostLikely, digits=c(rep(0, 8), 5)), type="html", include.rownames=FALSE)
 ```
 
 ```{r, eval=FALSE, echo=FALSE, results="hide"}
