@@ -15,10 +15,10 @@ output:
 # 285 folks with 4 tickets, each has a 17.3% chance of getting drawn
 # 658 folks with 2 tickets, each has a 9.0% chance of getting drawn
 # 1409 folks with 1 ticket, each has a 4.6% chance of getting drawn
-distn <- c(1409, 658, 285, 143, 58, 26)  # Number of entrants for each ticket count
-probWSER <- c(4.6, 9.0, 17.3, 31.5, 53.1, 78.1)  # Selection probabilities from WSER
+distn <- c(1427, 642, 281, 136, 57, 24)  # Number of entrants for each ticket count
+probWSER <- c(4.7, 9.2, 17.7, 32.2, 54.0, 78.8)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
-size <- 2.5E5  # Use 1E6 for production, 1E3 for testing
+size <- 1E5  # Use 1E6 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
@@ -70,8 +70,8 @@ aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an i
 # simulated lotteries is variable `size`. Set the random number seed as the date
 # of the lottery in numeric form multipied by the number of applicants.
 set.seed(as.numeric(dateLottery) * applicants)
-require(parallel)
-require(doParallel)
+require(parallel, quietly=TRUE)
+require(doParallel, quietly=TRUE)
 cores <- min(detectCores(), 4)
 cl <- makeCluster(cores)
 registerDoParallel(cl)
@@ -128,7 +128,7 @@ stopCluster(cl)
 confail <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
 frameLottery <- data.frame(sim, confail)
-require(data.table)
+require(data.table, quietly=TRUE)
 frameLottery <- data.table(frameLottery)
 aggTime <- system.time(
   aggLottery <- frameLottery[,
@@ -145,7 +145,7 @@ sim <- rep(seq(1, size), each=nlev)
 confail <- factor(rep(seq(1, nlev), size))
 freq <- as.vector(t(aggLottery[, list(confail.0, confail.1, confail.2, confail.3, confail.4, confail.5)]))
 frameSummary <- data.frame(sim, confail, freq)
-require(reshape2)
+require(reshape2, quietly=TRUE)
 frameSummary <- melt(aggLottery, id.vars=c("sim"))
 frameSummary$confail <- factor(gsub("confail\\.", "", frameSummary$variable))
 frameSummary$freq <- frameSummary$value
@@ -186,6 +186,7 @@ names(simsum) <- c("Consec. Failures", "N", "Mean", "EV", "Prob (WSER)", "EV (WS
 ```{r PlotProbabilities, echo=FALSE}
 title <- sprintf("%.0d WSER Lottery Selection Probability Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Probability of selection"
+options(scipen=999)
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Consecutive failures"
 annolab <- sprintf("%.2f%%", simsum$Mean)

@@ -2,7 +2,7 @@ require(rmarkdown)
 path <- "Users\\chanb\\Documents\\GitHub Repositories\\WSERLottery\\"
 if (Sys.info()["nodename"] == "CHSE") {
   path <- paste0("\\\\tsclient\\C\\", path)
-} else if (Sys.info()["nodename"] == "CHANB") {
+} else if (Sys.info()["nodename"] == "GHBA299") {
   path <- paste0("C:\\", path)
 } else if (Sys.info()["nodename"] == "FAMILYPC") {
   path <- "C:\\Users\\Ben\\Documents\\GitHub repositories\\WSERLottery\\"
