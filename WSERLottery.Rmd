@@ -9,14 +9,14 @@ output:
 ```{r, echo=FALSE, results="hide"}
 # PARAMETERS TO UPDATE
 # ---------------------
-# 26 folks with 32 tickets, each has a 78.1% chance of getting drawn
-# 58 folks with 16 tickets, each has a 53.1% chance of getting drawn
-# 143 folks with 8 tickets, each has a 31.5% chance of getting drawn
-# 285 folks with 4 tickets, each has a 17.3% chance of getting drawn
-# 658 folks with 2 tickets, each has a 9.0% chance of getting drawn
-# 1409 folks with 1 ticket, each has a 4.6% chance of getting drawn
-distn <- c(1427, 642, 281, 136, 57, 24)  # Number of entrants for each ticket count
-probWSER <- c(4.7, 9.2, 17.7, 32.2, 54.0, 78.8)  # Selection probabilities from WSER
+# 24 folks with 32 tickets, each has a 78.8% chance of getting drawn
+# 57 folks with 16 tickets, each has a 54.0% chance of getting drawn
+# 136 folks with 8 tickets, each has a 32.2% chance of getting drawn
+# 281 folks with 4 tickets, each has a 17.6% chance of getting drawn
+# 641 folks with 2 tickets, each has a 9.3% chance of getting drawn
+# 1427 folks with 1 ticket, each has a 4.7% chance of getting drawn
+distn <- c(1427, 641, 281, 136, 57, 24)  # Number of entrants for each ticket count
+probWSER <- c(4.7, 9.3, 17.6, 32.2, 54.0, 78.8)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
 size <- 1E5  # Use 1E6 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
