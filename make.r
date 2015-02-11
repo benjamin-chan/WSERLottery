@@ -1,3 +1,10 @@
+if (!require(parallel)) {install.packages("parallel", dependencies=TRUE)}
+if (!require(doParallel)) {install.packages("doParallel", dependencies=TRUE)}
+if (!require(data.table)) {install.packages("data.table", dependencies=TRUE)}
+if (!require(reshape2)) {install.packages("reshape2", dependencies=TRUE)}
+if (!require(ggplot2)) {install.packages("ggplot2", dependencies=TRUE)}
+if (!require(xtable)) {install.packages("xtable", dependencies=TRUE)}
+if (!require(rmarkdown)) {install.packages("rmarkdown", dependencies=TRUE)}
 require(rmarkdown)
 path <- "Users\\chanb\\Documents\\GitHub Repositories\\WSERLottery\\"
 if (Sys.info()["nodename"] == "CHSE") {
@@ -9,5 +16,6 @@ if (Sys.info()["nodename"] == "CHSE") {
 } else if (Sys.info()["nodename"] == "MAMAYAGA") {
   path <- "C:\\Users\\Cat Buckley\\Documents\\GitHub\\WSERLottery\\"
 }
+path <- "~/WSERLottery-master/"
 render(paste0(path, "WSERLottery.Rmd"), output_format="ioslides_presentation")
 file.rename(paste0(path, "WSERLottery.html"), paste0(path, "index.html"))

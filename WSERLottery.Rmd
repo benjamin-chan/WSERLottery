@@ -18,7 +18,7 @@ output:
 distn <- c(1427, 641, 281, 136, 57, 24)  # Number of entrants for each ticket count
 probWSER <- c(4.7, 9.3, 17.6, 32.2, 54.0, 78.8)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
-size <- 1E5  # Use 1E6 for production, 1E3 for testing
+size <- 1E5  # Use 1E5 for production, 1E3 for testing
 dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
@@ -70,17 +70,17 @@ aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an i
 # simulated lotteries is variable `size`. Set the random number seed as the date
 # of the lottery in numeric form multipied by the number of applicants.
 set.seed(as.numeric(dateLottery) * applicants)
-require(parallel, quietly=TRUE)
-require(doParallel, quietly=TRUE)
-cores <- min(detectCores(), 4)
-cl <- makeCluster(cores)
-registerDoParallel(cl)
+# require(parallel, quietly=TRUE)
+# require(doParallel, quietly=TRUE)
+# cores <- min(detectCores(), 4)
+# cl <- makeCluster(cores)
+# registerDoParallel(cl)
 simTime <- system.time(
-  lottery <- foreach (i=1:size, .combine=rbind) %dopar% {
+#   lottery <- foreach (i=1:size, .combine=rbind) %dopar% {
     sample(frameHat$runner, spots, prob=frameHat$prob)
-  }
+#   }
 )
-stopCluster(cl)
+# stopCluster(cl)
 #
 # One simulated lottery
 # ---------------------
