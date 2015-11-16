@@ -1,5 +1,5 @@
 ---
-title: "2015 Western States Endurance Run Lottery"
+title: "2016 Western States Endurance Run Lottery"
 author: "Benjamin Chan (https://github.com/benjamin-chan/WSERLottery)"
 output:
   ioslides_presentation: default
@@ -16,10 +16,15 @@ output:
 # 641 folks with 2 tickets, each has a 9.3% chance of getting drawn
 # 1427 folks with 1 ticket, each has a 4.7% chance of getting drawn
 distn <- c(1427, 641, 281, 136, 57, 24)  # Number of entrants for each ticket count
-probWSER <- c(4.7, 9.3, 17.6, 32.2, 54.0, 78.8)  # Selection probabilities from WSER
+freq <- distn / sum(distn)  # Frequency distribution from previous year
+freq <- floor(freq * 1e3) / 1e3  # Round down to the nearest 1e-3
+freq <- c(freq, 1 - sum(freq))  # Add the remainder to the newly greatest ticket level
+nEntrants <- 3563  # as of 2015-11-15 (https://ultrasignup.com/lottery/lottery_applicants.aspx?did=34773)
+distn <- round(nEntrants * freq)
+probWSER <- c(4.7, 9.3, 17.6, 32.2, 54.0, 78.8, 0)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
-dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; use lottery date
+dateLottery <- as.Date("2015-12-05", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
 
@@ -46,7 +51,8 @@ dateLottery <- as.Date("2014-12-06", format="%Y-%m-%d")  # Random number seed; u
 # correctly.
 applicants <- sum(distn)
 runner <- seq(1, applicants)
-confail <- c(rep(5, distn[6]),
+confail <- c(rep(6, distn[7]),
+             rep(5, distn[6]),
              rep(4, distn[5]),
              rep(3, distn[4]),
              rep(2, distn[3]),
@@ -70,17 +76,17 @@ aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an i
 # simulated lotteries is variable `size`. Set the random number seed as the date
 # of the lottery in numeric form multipied by the number of applicants.
 set.seed(as.numeric(dateLottery) * applicants)
-# require(parallel, quietly=TRUE)
-# require(doParallel, quietly=TRUE)
-# cores <- min(detectCores(), 4)
-# cl <- makeCluster(cores)
-# registerDoParallel(cl)
+library(parallel, quietly=TRUE)
+library(doParallel, quietly=TRUE)
+cores <- min(detectCores(), 4)
+cl <- makeCluster(cores)
+registerDoParallel(cl)
 simTime <- system.time(
-#   lottery <- foreach (i=1:size, .combine=rbind) %dopar% {
+  lottery <- foreach (i=1:size, .combine=rbind) %dopar% {
     sample(frameHat$runner, spots, prob=frameHat$prob)
-#   }
+  }
 )
-# stopCluster(cl)
+stopCluster(cl)
 #
 # One simulated lottery
 # ---------------------
@@ -128,7 +134,7 @@ stopCluster(cl)
 confail <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
 frameLottery <- data.frame(sim, confail)
-require(data.table, quietly=TRUE)
+library(data.table, quietly=TRUE)
 frameLottery <- data.table(frameLottery)
 aggTime <- system.time(
   aggLottery <- frameLottery[,
@@ -137,15 +143,22 @@ aggTime <- system.time(
                                   confail.2 = sum(confail == 2),
                                   confail.3 = sum(confail == 3),
                                   confail.4 = sum(confail == 4),
-                                  confail.5 = sum(confail == 5)),
+                                  confail.5 = sum(confail == 5),
+                                  confail.6 = sum(confail == 6)),
                              sim]
 )
 nlev <- nlevels(frameLottery$confail)
 sim <- rep(seq(1, size), each=nlev)
 confail <- factor(rep(seq(1, nlev), size))
-freq <- as.vector(t(aggLottery[, list(confail.0, confail.1, confail.2, confail.3, confail.4, confail.5)]))
+freq <- as.vector(t(aggLottery[, list(confail.0, 
+                                      confail.1, 
+                                      confail.2, 
+                                      confail.3, 
+                                      confail.4, 
+                                      confail.5, 
+                                      confail.6)]))
 frameSummary <- data.frame(sim, confail, freq)
-require(reshape2, quietly=TRUE)
+library(reshape2, quietly=TRUE)
 frameSummary <- melt(aggLottery, id.vars=c("sim"))
 frameSummary$confail <- factor(gsub("confail\\.", "", frameSummary$variable))
 frameSummary$freq <- frameSummary$value
@@ -196,8 +209,9 @@ y2 <- max(density(frameSummary$prob[frameSummary$confail == 2])$y)
 y3 <- max(density(frameSummary$prob[frameSummary$confail == 3])$y)
 y4 <- max(density(frameSummary$prob[frameSummary$confail == 4])$y)
 y5 <- max(density(frameSummary$prob[frameSummary$confail == 5])$y)
-y <- c(y0, y1, y2, y3, y4, y5)
-require(ggplot2, quietly=TRUE)
+y6 <- max(density(frameSummary$prob[frameSummary$confail == 6])$y)
+y <- c(y0, y1, y2, y3, y4, y5, y6)
+library(ggplot2, quietly=TRUE)
 ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
@@ -232,7 +246,8 @@ y2 <- max(density(frameSummary$freq[frameSummary$confail == 2])$y)
 y3 <- max(density(frameSummary$freq[frameSummary$confail == 3])$y)
 y4 <- max(density(frameSummary$freq[frameSummary$confail == 4])$y)
 y5 <- max(density(frameSummary$freq[frameSummary$confail == 5])$y)
-y <- c(y0, y1, y2, y3, y4, y5)
+y6 <- max(density(frameSummary$freq[frameSummary$confail == 6])$y)
+y <- c(y0, y1, y2, y3, y4, y5, y6)
 ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
@@ -246,7 +261,7 @@ ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
 # -----------------------------
 # Compare to probabilities given in the WSER 2014 [lottery
 # statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
-require(xtable, quietly=TRUE)
+library(xtable, quietly=TRUE)
 print(xtable(simsum), type="html", include.rownames=FALSE)
 #
 # My estimates are *virtually identical* to the probabilities calculated by
@@ -287,11 +302,17 @@ ggplot(frameSample, aes(x=sim, fill=confail)) +
 ## Most likely scenarios
 
 ```{r, echo=FALSE, results="asis"}
-scenarios <- aggLottery[, .N, list(confail.0, confail.1, confail.2, confail.3, confail.4, confail.5)]
+scenarios <- aggLottery[, .N, list(confail.0, 
+                                   confail.1, 
+                                   confail.2, 
+                                   confail.3, 
+                                   confail.4, 
+                                   confail.5, 
+                                   confail.6)]
 scenarios <- scenarios[, prop := N / size]
 mostLikely <- scenarios[N == max(scenarios[, N])]
 setnames(mostLikely, names(mostLikely), c(2 ^ seq(0, nlev - 1), "N", "Prop."))
-print(xtable(mostLikely, digits=c(rep(0, 8), 5)), type="html", include.rownames=FALSE)
+print(xtable(mostLikely, digits=c(rep(0, 9), 5)), type="html", include.rownames=FALSE)
 ```
 
 ```{r, eval=FALSE, echo=FALSE, results="hide"}

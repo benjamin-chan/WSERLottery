@@ -6,7 +6,6 @@ if (!require(ggplot2)) {install.packages("ggplot2", dependencies=TRUE)}
 if (!require(xtable)) {install.packages("xtable", dependencies=TRUE)}
 if (!require(rmarkdown)) {install.packages("rmarkdown", dependencies=TRUE)}
 require(rmarkdown)
-path <- "Users\\chanb\\Documents\\GitHub Repositories\\WSERLottery\\"
 if (Sys.info()["nodename"] == "CHSE") {
   path <- paste0("\\\\tsclient\\C\\", path)
 } else if (Sys.info()["nodename"] == "GHBA299") {
@@ -15,7 +14,8 @@ if (Sys.info()["nodename"] == "CHSE") {
   path <- "C:\\Users\\Ben\\Documents\\GitHub repositories\\WSERLottery\\"
 } else if (Sys.info()["nodename"] == "MAMAYAGA") {
   path <- "C:\\Users\\Cat Buckley\\Documents\\GitHub\\WSERLottery\\"
+} else {
+  path <- "Dropbox/"
 }
-path <- "~/WSERLottery-master/"
 render(paste0(path, "WSERLottery.Rmd"), output_format="ioslides_presentation")
 file.rename(paste0(path, "WSERLottery.html"), paste0(path, "index.html"))
