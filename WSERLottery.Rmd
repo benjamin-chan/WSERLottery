@@ -9,19 +9,15 @@ output:
 ```{r, echo=FALSE, results="hide"}
 # PARAMETERS TO UPDATE
 # ---------------------
-# 24 folks with 32 tickets, each has a 78.8% chance of getting drawn
-# 57 folks with 16 tickets, each has a 54.0% chance of getting drawn
-# 136 folks with 8 tickets, each has a 32.2% chance of getting drawn
-# 281 folks with 4 tickets, each has a 17.6% chance of getting drawn
-# 641 folks with 2 tickets, each has a 9.3% chance of getting drawn
-# 1427 folks with 1 ticket, each has a 4.7% chance of getting drawn
-distn <- c(1427, 641, 281, 136, 57, 24)  # Number of entrants for each ticket count
-freq <- distn / sum(distn)  # Frequency distribution from previous year
-freq <- floor(freq * 1e3) / 1e3  # Round down to the nearest 1e-3
-freq <- c(freq, 1 - sum(freq))  # Add the remainder to the newly greatest ticket level
-nEntrants <- 3563  # as of 2015-11-15 (https://ultrasignup.com/lottery/lottery_applicants.aspx?did=34773)
-distn <- round(nEntrants * freq)
-probWSER <- c(4.7, 9.3, 17.6, 32.2, 54.0, 78.8, 0)  # Selection probabilities from WSER
+#    5 folks with 64 tickets, each has a 90.867% chance of getting drawn
+#   15 folks with 32 tickets, each has a 69.811% chance of getting drawn
+#   71 folks with 16 tickets, each has a 45.064% chance of getting drawn
+#  168 folks with  8 tickets, each has a 25.853% chance of getting drawn
+#  368 folks with  4 tickets, each has a 13.900% chance of getting drawn
+#  620 folks with  2 tickets, each has a  7.202% chance of getting drawn
+# 2281 folks with  1 ticket , each has a  3.672% chance of getting drawn
+distn <- c(2281, 620, 368, 168, 71, 15, 5)  # Number of entrants for each ticket count
+probWSER <- c(3.672, 7.202, 13.900, 25.853, 45.064, 69.811, 90.867)  # Selection probabilities from WSER
 spots <- 270  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
 dateLottery <- as.Date("2015-12-05", format="%Y-%m-%d")  # Random number seed; use lottery date
@@ -184,8 +180,28 @@ diffprob <- aggProb[, "prob"][, "mean"] - probWSER
 diffev <- ev - evWSER
 pctdiff <- 100 * diffprob / aggProb[, "prob"][, "mean"]
 sqerr <- diffprob ^2
-simsum <- data.frame(confail = aggProb[, "confail"], distn, mean = aggProb[, "prob"][, "mean"], ev, probWSER, evWSER, diffprob, diffev, pctdiff, sqerr)
-names(simsum) <- c("Consec. Failures", "N", "Mean", "EV", "Prob (WSER)", "EV (WSER)", "Diff. prob.", "Diff. EV", "% diff.", "Sq. error")
+simsum <- data.frame(confail = aggProb[, "confail"], 
+                     nTickets = 2 ^ (as.numeric(aggProb[, "confail"]) - 1),
+                     distn, 
+                     mean = aggProb[, "prob"][, "mean"], 
+                     ev, 
+                     probWSER, 
+                     evWSER, 
+                     diffprob, 
+                     diffev, 
+                     pctdiff, 
+                     sqerr)
+names(simsum) <- c("Consec. Failures", 
+                   "Number of tickets",
+                   "N", 
+                   "Mean", 
+                   "EV", 
+                   "Prob (WSER)", 
+                   "EV (WSER)", 
+                   "Diff. prob.", 
+                   "Diff. EV", 
+                   "% diff.", 
+                   "Sq. error")
 #
 # Summarize lottery simulations
 # -----------------------------
@@ -194,9 +210,9 @@ names(simsum) <- c("Consec. Failures", "N", "Mean", "EV", "Prob (WSER)", "EV (WS
 ```
 
 
+```{r PlotProbabilities, echo=FALSE, results='hide', fig.keep='none'}
 ## Probability of selection
 
-```{r PlotProbabilities, echo=FALSE}
 title <- sprintf("%.0d WSER Lottery Selection Probability Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Probability of selection"
 options(scipen=999)
@@ -232,9 +248,9 @@ ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
 ```
 
 
+```{r PlotFrequencies, echo=FALSE, results='hide', fig.keep='none'}
 ## Number of entrants
 
-```{r PlotFrequencies, echo=FALSE}
 title <- sprintf("%.0d WSER Lottery Selection Distribution Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
@@ -256,13 +272,14 @@ ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   theme(legend.position="bottom")
 ```
 
-```{r, echo=FALSE, results="hide"}
+## Probability of selection and expected number of entrants
+
+```{r, echo=FALSE}
 # Summarize lottery simulations
 # -----------------------------
 # Compare to probabilities given in the WSER 2014 [lottery
 # statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
-library(xtable, quietly=TRUE)
-print(xtable(simsum), type="html", include.rownames=FALSE)
+simsum[, c("Number of tickets", "N", "Mean", "EV")]
 #
 # My estimates are *virtually identical* to the probabilities calculated by
 # [WSER](http://www.wser.org/2013/11/27/2014-lottery-statistics) (*Mean* column
@@ -274,6 +291,8 @@ print(xtable(simsum), type="html", include.rownames=FALSE)
 # Outcome of sample of lotteries
 # ------------------------------
 ```
+
+Estimated from `r format(size, big.mark=",")` simulated lotteries.
 
 
 ## Sample of simulated lotteries
