@@ -31,7 +31,7 @@ Applicants | Tickets | *Chance of getting drawn*
 
 
 ```r
-distn <- c(2468, 1002, 393, 253, 111, 30, 2)  # Number of entrants for each ticket count
+distn <- c(2430, 1026, 398, 257, 113, 31, 2)  # Number of entrants for each ticket count
 probWSER <- c(2.502, 4.940, 9.649, 18.358, 33.345, 55.581, 80.203)  # Selection probabilities from WSER
 spots <- 250  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
@@ -79,7 +79,7 @@ addmargins(table(factor(frameHat$tickets)))  # Check for match with `distn` vect
 ```
 ## 
 ##    1    2    4    8   16   32   64  Sum 
-## 2468 1002  393  253  111   30    2 4259
+## 2430 1026  398  257  113   31    2 4257
 ```
 
 ```r
@@ -88,13 +88,13 @@ aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an i
 
 ```
 ##   tickets          prob
-## 1       1 0.00009147457
-## 2       2 0.00018294914
-## 3       4 0.00036589828
-## 4       8 0.00073179656
-## 5      16 0.00146359312
-## 6      32 0.00292718624
-## 7      64 0.00585437248
+## 1       1 0.00009043227
+## 2       2 0.00018086453
+## 3       4 0.00036172906
+## 4       8 0.00072345813
+## 5      16 0.00144691626
+## 6      32 0.00289383252
+## 7      64 0.00578766504
 ```
 
 ## Simulate lottery
@@ -137,32 +137,32 @@ sampLottery
 
 ```
 ## $lottery
-## [1] 66534
+## [1] 22060
 ## 
 ## $runner
-##   [1]    1    2    6    8    9   10   11   13   16   20   22   25   26   28
-##  [15]   29   31   32   41   43   46   47   48   51   53   56   57   61   63
-##  [29]   66   72   73   78   81   88   89   92  100  101  104  108  110  113
-##  [43]  119  126  129  131  133  135  138  139  140  141  147  151  152  153
-##  [57]  164  165  167  169  172  173  174  175  193  198  204  216  223  229
-##  [71]  233  235  248  250  257  259  264  268  271  272  278  289  298  300
-##  [85]  304  305  312  321  323  336  341  344  345  350  351  353  357  368
-##  [99]  369  379  380  390  391  394  395  414  424  445  448  458  479  482
-## [113]  493  505  517  518  533  535  536  550  573  607  649  656  663  673
-## [127]  688  701  714  721  725  735  745  750  775  778  785  799  805  807
-## [141]  863  908  944  948  956  959  960 1024 1035 1062 1063 1082 1102 1172
-## [155] 1195 1222 1232 1236 1247 1268 1283 1300 1304 1337 1338 1344 1354 1357
-## [169] 1362 1382 1392 1394 1403 1415 1429 1457 1488 1549 1562 1580 1605 1607
-## [183] 1608 1642 1644 1666 1671 1676 1678 1709 1745 1751 1763 1771 1773 1818
-## [197] 1849 1986 2001 2070 2082 2140 2181 2193 2194 2246 2264 2320 2422 2508
-## [211] 2551 2609 2646 2762 2785 2833 2877 2884 2890 2892 3000 3055 3100 3146
-## [225] 3156 3284 3423 3465 3495 3522 3560 3579 3583 3624 3697 3717 3765 3797
-## [239] 3811 3882 3887 3891 3892 3917 3972 3984 4060 4113 4179 4180
+##   [1]    1    2    3    5    9   10   11   12   17   18   19   20   21   24
+##  [15]   25   26   29   30   34   35   38   43   46   48   51   53   57   59
+##  [29]   63   64   68   70   76   78   82   83   87   94   96   97   99  100
+##  [43]  103  105  106  112  116  117  123  124  125  127  130  134  135  136
+##  [57]  137  138  140  141  145  149  150  158  167  168  173  174  176  177
+##  [71]  184  196  203  209  213  214  216  226  230  234  238  242  244  245
+##  [85]  252  262  266  267  269  270  272  274  277  280  283  287  300  304
+##  [99]  306  321  323  331  334  338  342  351  352  361  362  365  369  383
+## [113]  386  389  398  399  401  402  415  428  433  437  442  445  459  461
+## [127]  487  524  529  543  551  562  563  564  575  591  601  613  625  626
+## [141]  659  674  682  684  692  705  733  743  753  757  763  782  832  854
+## [155]  871  875  894  978  983 1011 1032 1048 1065 1076 1087 1091 1114 1121
+## [169] 1124 1134 1150 1155 1177 1181 1189 1224 1238 1257 1258 1267 1278 1285
+## [183] 1295 1311 1360 1377 1404 1409 1432 1444 1451 1526 1531 1552 1559 1562
+## [197] 1570 1591 1612 1638 1679 1682 1737 1751 1805 1816 1939 1955 2038 2055
+## [211] 2109 2219 2226 2363 2466 2504 2520 2546 2564 2579 2613 2693 2733 2738
+## [225] 2776 2922 2947 3059 3116 3122 3238 3307 3325 3336 3344 3389 3408 3633
+## [239] 3738 3784 3845 3896 4029 4107 4118 4155 4163 4197 4214 4228
 ```
 
 Here's the distribution of the category of ticket holders from that random
 simulated lottery.
-I.e., in simulated lottery 66534, 
+I.e., in simulated lottery 22060, 
 
 
 ```r
@@ -176,15 +176,15 @@ print(xtable(agg1, digits = c(0, 0, 0, 0)), type = "html", include.rownames = FA
 ```
 
 <!-- html table generated in R 3.3.1 by xtable 1.8-2 package -->
-<!-- Tue Nov 22 13:33:26 2016 -->
+<!-- Wed Nov 30 11:01:36 2016 -->
 <table border=1>
 <tr> <th> year </th> <th> tickets </th> <th> Freq </th>  </tr>
-  <tr> <td align="right"> 1 </td> <td align="right"> 2 </td> <td align="right"> 55 </td> </tr>
-  <tr> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 58 </td> </tr>
-  <tr> <td align="right"> 3 </td> <td align="right"> 8 </td> <td align="right"> 32 </td> </tr>
-  <tr> <td align="right"> 4 </td> <td align="right"> 16 </td> <td align="right"> 53 </td> </tr>
-  <tr> <td align="right"> 5 </td> <td align="right"> 32 </td> <td align="right"> 35 </td> </tr>
-  <tr> <td align="right"> 6 </td> <td align="right"> 64 </td> <td align="right"> 15 </td> </tr>
+  <tr> <td align="right"> 1 </td> <td align="right"> 2 </td> <td align="right"> 44 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 54 </td> </tr>
+  <tr> <td align="right"> 3 </td> <td align="right"> 8 </td> <td align="right"> 34 </td> </tr>
+  <tr> <td align="right"> 4 </td> <td align="right"> 16 </td> <td align="right"> 57 </td> </tr>
+  <tr> <td align="right"> 5 </td> <td align="right"> 32 </td> <td align="right"> 43 </td> </tr>
+  <tr> <td align="right"> 6 </td> <td align="right"> 64 </td> <td align="right"> 16 </td> </tr>
   <tr> <td align="right"> 7 </td> <td align="right"> 128 </td> <td align="right"> 2 </td> </tr>
   <tr> <td align="right">  </td> <td align="right">  </td> <td align="right"> 250 </td> </tr>
    </table>
@@ -324,8 +324,7 @@ ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
   scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$Mean, y=y) +
-  theme_bw() +
-  theme(legend.position="bottom")
+  theme_bw()
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities-1.png)
@@ -359,8 +358,7 @@ ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$EV, y=y) +
-  theme_bw() +
-  theme(legend.position="bottom")
+  theme_bw()
 ```
 
 ![plot of chunk PlotFrequencies](figure/PlotFrequencies-1.png)
@@ -378,19 +376,19 @@ kable(simsum[, c("Number of tickets", "N", "Mean", "EV")])
 
 | Number of tickets|    N|      Mean|       EV|
 |-----------------:|----:|---------:|--------:|
-|                 1| 2468|  2.492948| 61.52597|
-|                 2| 1002|  4.922476| 49.32321|
-|                 4|  393|  9.606448| 37.75334|
-|                 8|  253| 18.291751| 46.27813|
-|                16|  111| 33.233955| 36.88969|
-|                32|   30| 55.422200| 16.62666|
-|                64|    2| 80.150000|  1.60300|
+|                 1| 2430|  2.464224| 59.88065|
+|                 2| 1026|  4.866943| 49.93483|
+|                 4|  398|  9.500261| 37.81104|
+|                 8|  257| 18.098537| 46.51324|
+|                16|  113| 32.929115| 37.20990|
+|                32|   31| 55.010936| 17.05339|
+|                64|    2| 79.847500|  1.59695|
 
 My estimates are *virtually identical* to the probabilities calculated by
 [WSER](http://www.wser.org/2013/11/27/2014-lottery-statistics) (*Mean* column
 versus the *Prob (WSER)* column). Percent differences of the selection
-probabilities are never more than 0.4429542% and the mean
-squared error of the selection probabilities is 0.006707.
+probabilities are never more than 1.5656274% and the mean
+squared error of the selection probabilities is 0.102932.
 
 
 # Outcome of sample of lotteries
@@ -442,12 +440,14 @@ print(xtable(mostLikely, digits=c(rep(0, 9), 5)), type="html", include.rownames=
 ```
 
 <!-- html table generated in R 3.3.1 by xtable 1.8-2 package -->
-<!-- Tue Nov 22 13:37:10 2016 -->
+<!-- Wed Nov 30 11:05:20 2016 -->
 <table border=1>
 <tr> <th> 1 </th> <th> 2 </th> <th> 4 </th> <th> 8 </th> <th> 16 </th> <th> 32 </th> <th> 64 </th> <th> N </th> <th> Prop. </th>  </tr>
-  <tr> <td align="right"> 57 </td> <td align="right"> 50 </td> <td align="right"> 37 </td> <td align="right"> 47 </td> <td align="right"> 42 </td> <td align="right"> 15 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
-  <tr> <td align="right"> 59 </td> <td align="right"> 47 </td> <td align="right"> 39 </td> <td align="right"> 46 </td> <td align="right"> 41 </td> <td align="right"> 16 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
-  <tr> <td align="right"> 61 </td> <td align="right"> 47 </td> <td align="right"> 39 </td> <td align="right"> 50 </td> <td align="right"> 35 </td> <td align="right"> 17 </td> <td align="right"> 1 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
+  <tr> <td align="right"> 59 </td> <td align="right"> 52 </td> <td align="right"> 31 </td> <td align="right"> 49 </td> <td align="right"> 39 </td> <td align="right"> 18 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
+  <tr> <td align="right"> 57 </td> <td align="right"> 53 </td> <td align="right"> 36 </td> <td align="right"> 48 </td> <td align="right"> 36 </td> <td align="right"> 18 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
+  <tr> <td align="right"> 64 </td> <td align="right"> 49 </td> <td align="right"> 37 </td> <td align="right"> 47 </td> <td align="right"> 37 </td> <td align="right"> 14 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
+  <tr> <td align="right"> 56 </td> <td align="right"> 50 </td> <td align="right"> 36 </td> <td align="right"> 48 </td> <td align="right"> 42 </td> <td align="right"> 16 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
+  <tr> <td align="right"> 59 </td> <td align="right"> 51 </td> <td align="right"> 37 </td> <td align="right"> 47 </td> <td align="right"> 36 </td> <td align="right"> 18 </td> <td align="right"> 2 </td> <td align="right"> 4 </td> <td align="right"> 0.00004 </td> </tr>
    </table>
 
 # Actual results
@@ -488,8 +488,8 @@ y <- y1 & y2 & y3 & y4 & y5
 aggLottery[y,]
 ```
 
-Of the 100,000 simulated lotteries, only 5.6811328, or
-0.00568%, matched the exact outcome of the
+Of the 100,000 simulated lotteries, only 5.5763089, or
+0.00558%, matched the exact outcome of the
 actual lottery.
 
 
@@ -502,7 +502,7 @@ Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository 
 
 
 ```
-## Timestamp: 2016-11-22 13:37:10
+## Timestamp: 2016-11-30 11:05:20
 ```
 
 ```
@@ -510,15 +510,15 @@ Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository 
 ```
 
 ```
-## Random number seed: 72990742
+## Random number seed: 72956466
 ```
 
 ```
-## Elapsed time of simulation: 2.886 minutes
+## Elapsed time of simulation: 2.666 minutes
 ```
 
 ```
-## Elapsed time of aggregation: 0.441 minutes
+## Elapsed time of aggregation: 0.436 minutes
 ```
 
 ```
@@ -531,20 +531,20 @@ Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository 
 ## [8] base     
 ## 
 ## other attached packages:
-##  [1] knitr_1.14          xtable_1.8-2        ggplot2_2.1.0      
-##  [4] reshape2_1.4.1      doParallel_1.0.10   iterators_1.0.8    
-##  [7] foreach_1.4.3       rmarkdown_1.0       data.table_1.9.6   
+##  [1] xtable_1.8-2        ggplot2_2.1.0       reshape2_1.4.1     
+##  [4] data.table_1.9.6    doParallel_1.0.10   iterators_1.0.8    
+##  [7] foreach_1.4.3       rmarkdown_1.0       knitr_1.14         
 ## [10] checkpoint_0.3.16   RevoUtilsMath_8.0.3
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_0.12.7        magrittr_1.5       munsell_0.4.3     
 ##  [4] colorspace_1.2-7   highr_0.6          stringr_1.1.0     
 ##  [7] plyr_1.8.4         tools_3.3.1        grid_3.3.1        
-## [10] gtable_0.2.0       htmltools_0.3.5    yaml_2.1.13       
-## [13] digest_0.6.10      RColorBrewer_1.1-2 formatR_1.4       
-## [16] codetools_0.2-15   evaluate_0.9       labeling_0.3      
-## [19] stringi_1.1.1      compiler_3.3.1     RevoUtils_10.0.1  
-## [22] scales_0.4.0       chron_2.3-47
+## [10] gtable_0.2.0       htmltools_0.3.5    digest_0.6.10     
+## [13] RColorBrewer_1.1-2 formatR_1.4        codetools_0.2-15  
+## [16] evaluate_0.9       labeling_0.3       stringi_1.1.1     
+## [19] compiler_3.3.1     RevoUtils_10.0.1   scales_0.4.0      
+## [22] chron_2.3-47
 ```
 
 ```

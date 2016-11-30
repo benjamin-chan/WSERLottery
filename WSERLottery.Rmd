@@ -29,7 +29,7 @@ Applicants | Tickets | *Chance of getting drawn*
 2468       |  1      |  2.502%
 
 ```{r}
-distn <- c(2468, 1002, 393, 253, 111, 30, 2)  # Number of entrants for each ticket count
+distn <- c(2430, 1026, 398, 257, 113, 31, 2)  # Number of entrants for each ticket count
 probWSER <- c(2.502, 4.940, 9.649, 18.358, 33.345, 55.581, 80.203)  # Selection probabilities from WSER
 spots <- 250  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
@@ -233,7 +233,7 @@ simulated lotteries.
 
 ## Probability of selection
 
-```{r PlotProbabilities}
+```{r PlotProbabilities, fig.width = 10}
 title <- sprintf("%.0d WSER Lottery Selection Probability Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Probability of selection"
 options(scipen=999)
@@ -254,8 +254,7 @@ ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
   scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$Mean, y=y) +
-  theme_bw() +
-  theme(legend.position="bottom")
+  theme_bw()
 ```
 
 As expected, the spread of the selection probabilities increases as the number
@@ -267,7 +266,7 @@ random variable increases with $p$).
 Another way to think about the lottery is to plot the distribution of the
 frequency of runners selected by number of tickets.
 
-```{r PlotFrequencies}
+```{r PlotFrequencies, fig.width = 10}
 title <- sprintf("%.0d WSER Lottery Selection Distribution Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
@@ -286,8 +285,7 @@ ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   scale_fill_brewer(palette="Spectral") +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$EV, y=y) +
-  theme_bw() +
-  theme(legend.position="bottom")
+  theme_bw()
 ```
 
 ## Probability of selection and expected number of entrants
