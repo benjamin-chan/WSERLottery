@@ -337,64 +337,6 @@ ggplot(frameSample, aes(x=sim, fill=confail)) +
         plot.title = element_text(hjust = 0.5))
 ```
 
-## Most likely scenarios
-
-Don't run this snippet; not that useful.
-
-```{r, eval = FALSE}
-scenarios <- aggLottery[, .N, list(confail.0, 
-                                   confail.1, 
-                                   confail.2, 
-                                   confail.3, 
-                                   confail.4, 
-                                   confail.5, 
-                                   confail.6)]
-scenarios <- scenarios[, prop := N / size]
-mostLikely <- scenarios[N == max(scenarios[, N])]
-setnames(mostLikely, names(mostLikely), c(2 ^ seq(0, nlev - 1), "N", "Prop."))
-kable(mostLikely)
-```
-
-# Actual results
-
-The actual lottery was held on December 7, 2012. Here are the results, from
-the Western States Endurance Run [Facebook post](https://www.facebook.com/permalink.php?story_fbid=10152053026305412&id=293403870411),
-
-> Congratulations to all those chosen in the lottery today. Here are some
-> stats for the ticket groups of the 270 selected (and predicted by our MC
-> simulations)  
-> one ticket - 101 selected (112 predicted))  
-> two tickets - 78 (70)  
-> three tickets - 45 (47)  
-> four tickets -27 (25)  
-> five tickets - 19 (15)  
-
-Compare the observed lottery to the expected lottery.
-
-```{r, eval=FALSE, results="hide"}
-yObs <- c(101, 78, 45, 27, 19)
-yExp <- simsum$EV
-frameObsExp <- data.frame(yObs, yExp, diff=yObs - yExp)
-names(frameObsExp) <- c("Observed", "Expected", "Difference")
-print(xtable(frameObsExp), type="html", include.rownames=FALSE)
-```
-
-I wonder how many times this outcome appeared in my simulated lotteries?
-
-```{r, eval=FALSE, results="hide"}
-y1 <- aggLottery$confail[,1] == yObs[1]
-y2 <- aggLottery$confail[,2] == yObs[2]
-y3 <- aggLottery$confail[,3] == yObs[3]
-y4 <- aggLottery$confail[,4] == yObs[4]
-y5 <- aggLottery$confail[,5] == yObs[5]
-y <- y1 & y2 & y3 & y4 & y5
-aggLottery[y,]
-```
-
-Of the `r format(size, big.mark=",")` simulated lotteries, only `r sum(y)`, or
-`r sprintf("%.5f%%", 100 * sum(y) / size)`, matched the exact outcome of the
-actual lottery.
-
 
 # Details
 
