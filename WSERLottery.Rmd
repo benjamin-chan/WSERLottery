@@ -1,5 +1,5 @@
 ---
-title: "2016 Western States Endurance Run Lottery"
+title: "2018 Western States Endurance Run Lottery"
 author: "Benjamin Chan (https://github.com/benjamin-chan/WSERLottery)"
 ---
 
@@ -31,9 +31,11 @@ Applicants | Tickets | *Chance of getting drawn*
 ```{r}
 distn <- c(2430, 1026, 398, 257, 113, 31, 2)  # Number of entrants for each ticket count
 probWSER <- c(2.502, 4.940, 9.649, 18.358, 33.345, 55.581, 80.203)  # Selection probabilities from WSER
+                                                                    # Not necessary for simulation
+                                                                    # Only used to comparison
 spots <- 250  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
-dateLottery <- as.Date("2016-12-03", format="%Y-%m-%d")  # Random number seed; use lottery date
+dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
 # Simulation
@@ -71,7 +73,7 @@ tickets <- 2^confail
 frameHat <- data.frame(runner, confail, tickets)
 frameHat$prob <- frameHat$tickets / sum(frameHat$tickets)
 addmargins(table(factor(frameHat$tickets)))  # Check for match with `distn` vector
-aggregate(prob ~ tickets, frameHat, mean)  # Check success probabilities of an individual draw
+kable(aggregate(prob ~ tickets, frameHat, mean))  # Check success probabilities of an individual draw
 ```
 
 ## Simulate lottery
@@ -88,8 +90,6 @@ of the lottery in numeric form multipied by the number of applicants.
 
 ```{r}
 set.seed(as.numeric(dateLottery) * applicants)
-library(parallel, quietly=TRUE)
-library(doParallel, quietly=TRUE)
 cores <- min(detectCores(), 4)
 cl <- makeCluster(cores)
 registerDoParallel(cl)
@@ -121,7 +121,7 @@ agg1$tickets <- 2 ^ agg1$year
 agg1[agg1$Var1 == "Sum", ]$year <- NA
 agg1[agg1$Var1 == "Sum", ]$tickets <- NA
 agg1 <- agg1[, c("year", "tickets", "Freq")]
-print(xtable(agg1, digits = c(0, 0, 0, 0)), type = "html", include.rownames = FALSE)
+kable(agg1)
 ```
 
 Okay... but what happened with the other `r size - 1` simulated lotteries?
@@ -151,7 +151,6 @@ Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 confail <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
 frameLottery <- data.frame(sim, confail)
-library(data.table, quietly=TRUE)
 frameLottery <- data.table(frameLottery)
 aggTime <- system.time(
   aggLottery <- frameLottery[,
@@ -248,13 +247,15 @@ y4 <- max(density(frameSummary$prob[frameSummary$confail == 4])$y)
 y5 <- max(density(frameSummary$prob[frameSummary$confail == 5])$y)
 y6 <- max(density(frameSummary$prob[frameSummary$confail == 6])$y)
 y <- c(y0, y1, y2, y3, y4, y5, y6)
-library(ggplot2, quietly=TRUE)
 ggplot(frameSummary, aes(x=prob, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
+  scale_y_sqrt() +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$Mean, y=y) +
-  theme_bw()
+  theme_bw() +
+  theme(legend.position = c(0.9, 0.8),
+        plot.title = element_text(hjust = 0.5))
 ```
 
 As expected, the spread of the selection probabilities increases as the number
@@ -283,9 +284,12 @@ y <- c(y0, y1, y2, y3, y4, y5, y6)
 ggplot(frameSummary, aes(x=freq, y=..density.., fill=confail)) +
   geom_density(alpha=1/2, color=NA) +
   scale_fill_brewer(palette="Spectral") +
+  scale_y_sqrt() + 
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   annotate("text", label=annolab, x=simsum$EV, y=y) +
-  theme_bw()
+  theme_bw() +
+  theme(legend.position = c(0.9, 0.8),
+        plot.title = element_text(hjust = 0.5))
 ```
 
 ## Probability of selection and expected number of entrants
@@ -329,12 +333,15 @@ ggplot(frameSample, aes(x=sim, fill=confail)) +
   labs(title=title, x=xlab, y=ylab, fill=filllab) +
   coord_flip() +
   theme_bw() +
-  theme(legend.position="top")
+  theme(legend.position="top",
+        plot.title = element_text(hjust = 0.5))
 ```
 
 ## Most likely scenarios
 
-```{r, results="asis"}
+Don't run this snippet; not that useful.
+
+```{r, eval = FALSE}
 scenarios <- aggLottery[, .N, list(confail.0, 
                                    confail.1, 
                                    confail.2, 
@@ -345,7 +352,7 @@ scenarios <- aggLottery[, .N, list(confail.0,
 scenarios <- scenarios[, prop := N / size]
 mostLikely <- scenarios[N == max(scenarios[, N])]
 setnames(mostLikely, names(mostLikely), c(2 ^ seq(0, nlev - 1), "N", "Prop."))
-print(xtable(mostLikely, digits=c(rep(0, 9), 5)), type="html", include.rownames=FALSE)
+kable(mostLikely)
 ```
 
 # Actual results
