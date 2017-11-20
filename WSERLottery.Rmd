@@ -295,15 +295,15 @@ ggplot(frameSummary, aes(x = confail, y = freq, fill = confail)) +
 ```
 
 
-## Probability all `r tickets[max(confail)]`-ticket holders are selected
+## Probability all `r tickets[nlev - 1]`-ticket holders are selected
 
 ```{r}
-max <- max(confail)
-df <- aggregate(sim ~ freq, frameSummary[confail == max, ], length)
+df <- aggregate(sim ~ freq, frameSummary[confail == nlev - 1, ], length)
+nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
-The probability all `r tickets[max(confail)]`-ticket holders are selected is 
-`r sprintf("%.02f%%", df[df$freq == max(df$freq), "sim"] / size * 100)`.
+The probability all `r tickets[nlev - 1]`-ticket holders are selected is 
+`r sprintf("%.02f%%", nsim / size * 100)`.
 
 
 ## Probability of selection and expected number of entrants
