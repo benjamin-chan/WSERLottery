@@ -18,22 +18,22 @@ library(rmarkdown)
 
 Parameters to update.
 
-> Total Tickets: 15061     Total Entrants: 4926
+> Total Tickets: 15075     Total Entrants: 4924
 > 
-> Last Updated: 11-19-2017 07:45:18 PST
+> Last Updated: 11-19-2017 17:00:13 PST
 > 
 > Years (Tickets) | Entrants| Tickets
 > ----------------|---------|--------
 > 7 (64) |    9 |  576
-> 6 (32) |   68 | 2176
-> 5 (16) |  163 | 2608
+> 6 (32) |   69 | 2208
+> 5 (16) |  162 | 2592
 > 4 ( 8) |  282 | 2256
 > 3 ( 4) |  663 | 2652
 > 2 ( 2) | 1052 | 2104
-> 1 ( 1) | 2689 | 2689
+> 1 ( 1) | 2687 | 2687
 
 ```{r}
-distn <- c(2689, 1052, 663, 282, 163, 68, 9)  # Number of entrants for each ticket count
+distn <- c(2687, 1052, 663, 282, 162, 69, 9)  # Number of entrants for each ticket count
 probWSER <- c(2.502, 4.940, 9.649, 18.358, 33.345, 55.581, 80.203)  # Selection probabilities from WSER
                                                                     # Not necessary for simulation
                                                                     # Only used to comparison
