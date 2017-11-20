@@ -310,6 +310,18 @@ ggplot(frameSummary, aes(x = confail, y = freq, fill = confail)) +
         plot.title = element_text(hjust = 0.5))
 ```
 
+
+## Probability all `r tickets[max(confail)]`-ticket holders are selected
+
+```{r}
+max <- max(confail)
+df <- aggregate(sim ~ freq, frameSummary[confail == max, ], length)
+```
+
+The probability all `r tickets[max(confail)]`-ticket holders are selected is 
+`r sprintf("%.02f%%", df[df$freq == max(df$freq), "sim"] / size * 100)`.
+
+
 ## Probability of selection and expected number of entrants
 
 Compare to probabilities given in the WSER 2014 [lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
