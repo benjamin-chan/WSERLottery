@@ -17,20 +17,22 @@ library(rmarkdown)
 ```
 
 Parameters to update.
+Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 
-> Total Tickets: 15075     Total Entrants: 4924
+> Total Tickets: 15066     Total Entrants: 4922
 > 
-> Last Updated: 11-19-2017 17:00:13 PST
+> Last Updated: 11-20-2017 12:23:43 PST
 > 
 > Years (Tickets) | Entrants| Tickets
-> ----------------|---------|--------
-> 7 (64) |    9 |  576
-> 6 (32) |   69 | 2208
-> 5 (16) |  162 | 2592
-> 4 ( 8) |  282 | 2256
-> 3 ( 4) |  663 | 2652
-> 2 ( 2) | 1052 | 2104
-> 1 ( 1) | 2687 | 2687
+> :--------------:|:-------:|:------:
+> 7 (64) |    8 |  512
+> 6 (32) |   71 | 2272
+> 5 (16) |  161 | 2576
+> 4 (8)  |  282 | 2256
+> 3 (4)  |  665 | 2660
+> 2 (2)  | 1055 | 2110
+> 1 (1)  | 2680 | 2680
+
 
 ```{r}
 distn <- c(2687, 1052, 663, 282, 162, 69, 9)  # Number of entrants for each ticket count
