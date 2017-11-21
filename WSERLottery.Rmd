@@ -37,7 +37,7 @@ Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 
 
 ```{r}
-distn <- c(2687, 1052, 663, 282, 162, 69, 9)  # Number of entrants for each ticket count
+distn <- c(2678, 1056, 665, 282, 161, 71, 8)  # Number of entrants for each ticket count
 spots <- 250  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
 dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
@@ -301,7 +301,7 @@ Estimated from `r format(size, big.mark=",")` simulated lotteries.
 ## Sample of simulated lotteries
 
 ```{r sampleOutcomes, results="asis"}
-s <- 25
+s <- 20
 title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
 xlab <- "Simulated lottery"
 ylab <- "Number of selected runners\nEach block represents 10 runners"
