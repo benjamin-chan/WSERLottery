@@ -68,15 +68,15 @@ correctly.
 ```{r}
 applicants <- sum(distn)
 runner <- seq(1, applicants)
-confail <- c(rep(6, distn[7]),
-             rep(5, distn[6]),
-             rep(4, distn[5]),
-             rep(3, distn[4]),
-             rep(2, distn[3]),
-             rep(1, distn[2]),
-             rep(0, distn[1]))
-tickets <- 2^confail
-frameHat <- data.frame(runner, confail, tickets)
+year <- c(rep(7, distn[7]),
+          rep(6, distn[6]),
+          rep(5, distn[5]),
+          rep(4, distn[4]),
+          rep(3, distn[3]),
+          rep(2, distn[2]),
+          rep(1, distn[1]))
+tickets <- 2^(year - 1)
+frameHat <- data.frame(runner, year, tickets)
 frameHat$prob <- frameHat$tickets / sum(frameHat$tickets)
 addmargins(table(factor(frameHat$tickets)))  # Check for match with `distn` vector
 kable(aggregate(prob ~ tickets, frameHat, mean))  # Check success probabilities of an individual draw
@@ -121,9 +121,9 @@ simulated lottery.
 I.e., in simulated lottery `r i`, 
 
 ```{r, results='asis'}
-agg1 <- data.frame(addmargins(table(frameHat$confail[sampLottery$runner])))
+agg1 <- data.frame(addmargins(table(frameHat$year[sampLottery$runner])))
 agg1$year <- as.numeric(agg1$Var1)
-agg1$tickets <- 2 ^ agg1$year
+agg1$tickets <- 2 ^ (agg1$year - 1)
 agg1[agg1$Var1 == "Sum", ]$year <- NA
 agg1[agg1$Var1 == "Sum", ]$tickets <- NA
 agg1 <- agg1[, c("year", "tickets", "Freq")]
@@ -146,7 +146,7 @@ tickets they started out with.
 cl <- makeCluster(cores)
 registerDoParallel(cl)
 lottery2 <- foreach (i=1:size, .combine=rbind) %dopar% {
-  frameHat$confail[lottery[i, ]]
+  frameHat$year[lottery[i, ]]
 }
 stopCluster(cl)
 ```
@@ -154,37 +154,36 @@ stopCluster(cl)
 Reformat the `lottery2` matrix to an aggregated data frame for analysis.
 
 ```{r}
-confail <- factor(as.vector(t(lottery2)))
+year <- factor(as.vector(t(lottery2)))
 sim <- rep(seq(1, size), each=spots)
-frameLottery <- data.frame(sim, confail)
-frameLottery <- data.table(frameLottery)
+frameLottery <- data.table(sim, year)
 aggTime <- system.time(
   aggLottery <- frameLottery[,
-                             list(confail.0 = sum(confail == 0),
-                                  confail.1 = sum(confail == 1),
-                                  confail.2 = sum(confail == 2),
-                                  confail.3 = sum(confail == 3),
-                                  confail.4 = sum(confail == 4),
-                                  confail.5 = sum(confail == 5),
-                                  confail.6 = sum(confail == 6)),
+                             list(year1 = sum(year == 1),
+                                  year2 = sum(year == 2),
+                                  year3 = sum(year == 3),
+                                  year4 = sum(year == 4),
+                                  year5 = sum(year == 5),
+                                  year6 = sum(year == 6),
+                                  year7 = sum(year == 7)),
                              sim]
 )
-nlev <- nlevels(frameLottery$confail)
+nlev <- nlevels(frameLottery$year)
 sim <- rep(seq(1, size), each=nlev)
-confail <- factor(rep(seq(1, nlev), size))
-freq <- as.vector(t(aggLottery[, list(confail.0, 
-                                      confail.1, 
-                                      confail.2, 
-                                      confail.3, 
-                                      confail.4, 
-                                      confail.5, 
-                                      confail.6)]))
-frameSummary <- data.frame(sim, confail, freq)
+year <- factor(rep(seq(1, nlev), size))
+freq <- as.vector(t(aggLottery[, list(year1, 
+                                      year2, 
+                                      year3, 
+                                      year4, 
+                                      year5, 
+                                      year6, 
+                                      year7)]))
+frameSummary <- data.frame(sim, year, freq)
 frameSummary <- melt(aggLottery, id.vars=c("sim"))
-frameSummary$confail <- factor(gsub("confail\\.", "", frameSummary$variable))
+frameSummary$year <- factor(gsub("year", "", frameSummary$variable))
 frameSummary$freq <- frameSummary$value
 frameSummary[, c("variable", "value")] <- NULL
-frameSummary <- frameSummary[order(frameSummary$sim, frameSummary$confail)]
+frameSummary <- frameSummary[order(frameSummary$sim, frameSummary$year)]
 ```
 
 Save the aggregated data frame for other analysis.
@@ -200,15 +199,15 @@ proportion of selected applicants.
 total <- rep(distn, size)
 frameSummary$prob <- 100 * (frameSummary$freq / total)
 aggFx <- function(x) {c(mean = mean(x), median = median(x), sd = sd(x))}
-aggProb <- aggregate(prob ~ confail, frameSummary, aggFx)
+aggProb <- aggregate(prob ~ year, frameSummary, aggFx)
 ev <- distn * aggProb[, "prob"][, "mean"] / 100
 evWSER <- distn * probWSER / 100
 diffprob <- aggProb[, "prob"][, "mean"] - probWSER
 diffev <- ev - evWSER
 pctdiff <- 100 * diffprob / aggProb[, "prob"][, "mean"]
 sqerr <- diffprob ^2
-simsum <- data.frame(confail = aggProb[, "confail"], 
-                     nTickets = 2 ^ (as.numeric(aggProb[, "confail"]) - 1),
+simsum <- data.frame(year = aggProb[, "year"], 
+                     nTickets = 2 ^ (as.numeric(aggProb[, "year"]) - 1),
                      distn, 
                      mean = aggProb[, "prob"][, "mean"], 
                      ev, 
@@ -218,7 +217,7 @@ simsum <- data.frame(confail = aggProb[, "confail"],
                      diffev, 
                      pctdiff, 
                      sqerr)
-names(simsum) <- c("Consec. Failures", 
+names(simsum) <- c("Years in lottery", 
                    "Number of tickets",
                    "N", 
                    "Mean", 
@@ -243,22 +242,22 @@ title <- sprintf("%.0d WSER Lottery Selection Probability Densities", as.numeric
 xlab <- "Probability of selection"
 options(scipen=999)
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
-filllab <- "Consecutive annual lottery failures"
+filllab <- "Years in lottery"
 annolab <- sprintf("%.2f%%", simsum$Mean)
-y0 <- max(density(frameSummary$prob[frameSummary$confail == 0])$y)
-y1 <- max(density(frameSummary$prob[frameSummary$confail == 1])$y)
-y2 <- max(density(frameSummary$prob[frameSummary$confail == 2])$y)
-y3 <- max(density(frameSummary$prob[frameSummary$confail == 3])$y)
-y4 <- max(density(frameSummary$prob[frameSummary$confail == 4])$y)
-y5 <- max(density(frameSummary$prob[frameSummary$confail == 5])$y)
-y6 <- max(density(frameSummary$prob[frameSummary$confail == 6])$y)
-y <- c(y0, y1, y2, y3, y4, y5, y6)
-ggplot(frameSummary, aes(x = confail, y = prob / 100, fill = confail)) +
+y1 <- max(density(frameSummary$prob[frameSummary$year == 1])$y)
+y2 <- max(density(frameSummary$prob[frameSummary$year == 2])$y)
+y3 <- max(density(frameSummary$prob[frameSummary$year == 3])$y)
+y4 <- max(density(frameSummary$prob[frameSummary$year == 4])$y)
+y5 <- max(density(frameSummary$prob[frameSummary$year == 5])$y)
+y6 <- max(density(frameSummary$prob[frameSummary$year == 6])$y)
+y7 <- max(density(frameSummary$prob[frameSummary$year == 7])$y)
+y <- c(y1, y2, y3, y4, y5, y6, y7)
+ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
   geom_violin() +
   scale_fill_brewer(palette="Spectral") + 
   scale_y_continuous(trans = "logit") + 
   labs(title=title, x=filllab, y=xlab, fill=filllab) +
-  annotate("text", label=annolab, y=simsum$Mean / 100, x=c(0:4+1.6, 5:6+0.5)) +
+  annotate("text", label=annolab, y=simsum$Mean / 100, x=c(1:5+0.6, 6:7-0.5)) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5))
 ```
@@ -276,35 +275,35 @@ frequency of runners selected by number of tickets.
 title <- sprintf("%.0d WSER Lottery Selection Distribution Densities", as.numeric(format(dateLottery, "%Y")) + 1)
 xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
-filllab <- "Consecutive annual lottery failures"
+filllab <- "Years in lottery"
 annolab <- sprintf("%.1f", simsum$EV)
-y0 <- max(density(frameSummary$freq[frameSummary$confail == 0])$y)
-y1 <- max(density(frameSummary$freq[frameSummary$confail == 1])$y)
-y2 <- max(density(frameSummary$freq[frameSummary$confail == 2])$y)
-y3 <- max(density(frameSummary$freq[frameSummary$confail == 3])$y)
-y4 <- max(density(frameSummary$freq[frameSummary$confail == 4])$y)
-y5 <- max(density(frameSummary$freq[frameSummary$confail == 5])$y)
-y6 <- max(density(frameSummary$freq[frameSummary$confail == 6])$y)
-y <- c(y0, y1, y2, y3, y4, y5, y6)
-ggplot(frameSummary, aes(x = confail, y = freq, fill = confail)) +
+y1 <- max(density(frameSummary$freq[frameSummary$year == 1])$y)
+y2 <- max(density(frameSummary$freq[frameSummary$year == 2])$y)
+y3 <- max(density(frameSummary$freq[frameSummary$year == 3])$y)
+y4 <- max(density(frameSummary$freq[frameSummary$year == 4])$y)
+y5 <- max(density(frameSummary$freq[frameSummary$year == 5])$y)
+y6 <- max(density(frameSummary$freq[frameSummary$year == 6])$y)
+y7 <- max(density(frameSummary$freq[frameSummary$year == 7])$y)
+y <- c(y1, y2, y3, y4, y5, y6, y7)
+ggplot(frameSummary, aes(x = year, y = freq, fill = year)) +
   geom_violin() +
   scale_fill_brewer(palette="Spectral") + 
   scale_y_sqrt() + 
   labs(title=title, x=filllab, y=xlab, fill=filllab) +
-  annotate("text", label=annolab, y=simsum$EV, x=c(0:5+1.3, 6+0.4)) +
+  annotate("text", label=annolab, y=simsum$EV, x=c(1:6+0.3, 7-0.4)) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5))
 ```
 
 
-## Probability all `r tickets[nlev - 1]`-ticket holders are selected
+## Probability all `r max(tickets)`-ticket holders are selected
 
 ```{r}
-df <- aggregate(sim ~ freq, frameSummary[confail == nlev - 1, ], length)
+df <- aggregate(sim ~ freq, frameSummary[year == nlev, ], length)
 nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
-The probability all `r tickets[nlev - 1]`-ticket holders are selected is 
+The probability all `r max(tickets)`-ticket holders are selected is 
 `r sprintf("%.02f%%", nsim / size * 100)`.
 
 
@@ -335,12 +334,12 @@ s <- 25
 title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
 xlab <- "Simulated lottery"
 ylab <- "Number of selected runners\nEach block represents 10 runners"
-filllab <- "Consecutive failures"
+filllab <- "Years in lottery"
 i <- sample(seq(1, size), s)
 frameSample <- frameLottery[frameLottery$sim %in% i, ]
 frameSample$sim <- factor(frameSample$sim)
 levels(frameSample$sim) <- rev(levels(frameSample$sim))
-ggplot(frameSample, aes(x=sim, fill=confail)) +
+ggplot(frameSample, aes(x=sim, fill=year)) +
   geom_bar(width=1) +
   geom_hline(yintercept = seq(0, spots, 10), color="white") +
   geom_vline(xintercept = seq(1, s)-0.5, color="white") +
