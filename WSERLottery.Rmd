@@ -1,7 +1,4 @@
----
-title: "2018 Western States Endurance Run Lottery"
-author: "Benjamin Chan (https://github.com/benjamin-chan/WSERLottery)"
----
+# 2018 Western States Endurance Run Lottery
 
 Load packages.
 
@@ -296,9 +293,7 @@ The probability all `r max(tickets)`-ticket holders are selected is
 
 # Outcome of sample of lotteries
 
-Estimated from `r format(size, big.mark=",")` simulated lotteries.
-
-## Sample of simulated lotteries
+Sample of `r format(size, big.mark=",")` simulated lotteries.
 
 ```{r sampleOutcomes, results="asis"}
 s <- 20
@@ -322,11 +317,6 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
   theme(legend.position="top",
         plot.title = element_text(hjust = 0.5))
 ```
-
-
-# Details
-
-Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository for the gory details.
 
 
 # Session info
