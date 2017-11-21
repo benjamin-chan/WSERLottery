@@ -38,9 +38,6 @@ Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 
 ```{r}
 distn <- c(2687, 1052, 663, 282, 162, 69, 9)  # Number of entrants for each ticket count
-probWSER <- c(2.502, 4.940, 9.649, 18.358, 33.345, 55.581, 80.203)  # Selection probabilities from WSER
-                                                                    # Not necessary for simulation
-                                                                    # Only used to comparison
 spots <- 250  # Number of spots up for grabs
 size <- 1E5  # Use 1E5 for production, 1E3 for testing
 dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
@@ -208,33 +205,16 @@ frameSummary$prob <- 100 * (frameSummary$freq / total)
 aggFx <- function(x) {c(mean = mean(x), median = median(x), sd = sd(x))}
 aggProb <- aggregate(prob ~ year, frameSummary, aggFx)
 ev <- distn * aggProb[, "prob"][, "mean"] / 100
-evWSER <- distn * probWSER / 100
-diffprob <- aggProb[, "prob"][, "mean"] - probWSER
-diffev <- ev - evWSER
-pctdiff <- 100 * diffprob / aggProb[, "prob"][, "mean"]
-sqerr <- diffprob ^2
 simsum <- data.frame(year = aggProb[, "year"], 
                      nTickets = 2 ^ (as.numeric(aggProb[, "year"]) - 1),
                      distn, 
                      mean = aggProb[, "prob"][, "mean"], 
-                     ev, 
-                     probWSER, 
-                     evWSER, 
-                     diffprob, 
-                     diffev, 
-                     pctdiff, 
-                     sqerr)
+                     ev)
 names(simsum) <- c("Years in lottery", 
                    "Number of tickets",
                    "N", 
-                   "Mean", 
-                   "EV", 
-                   "Prob (WSER)", 
-                   "EV (WSER)", 
-                   "Diff. prob.", 
-                   "Diff. EV", 
-                   "% diff.", 
-                   "Sq. error")
+                   "Mean probability of selection", 
+                   "Expected value")
 ```
 
 # Summarize lottery simulations
@@ -312,22 +292,6 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 
 The probability all `r max(tickets)`-ticket holders are selected is 
 `r sprintf("%.02f%%", nsim / size * 100)`.
-
-
-## Probability of selection and expected number of entrants
-
-Compare to probabilities given in the WSER 2014 [lottery statistics](http://www.wser.org/2013/11/27/2014-lottery-statistics/).
-
-```{r}
-kable(simsum[, c("Number of tickets", "N", "Mean", "EV")])
-```
-
-My estimates are *virtually identical* to the probabilities calculated by
-[WSER](http://www.wser.org/2013/11/27/2014-lottery-statistics) (*Mean* column
-versus the *Prob (WSER)* column). Percent differences of the selection
-probabilities are never more than `r max(abs(simsum$"% diff."))`% and the mean
-squared error of the selection probabilities is `r sprintf("%.6f",
-mean(simsum$"Sq. error"))`.
 
 
 # Outcome of sample of lotteries
