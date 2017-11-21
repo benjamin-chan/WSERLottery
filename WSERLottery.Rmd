@@ -11,6 +11,8 @@ library(doParallel)
 library(data.table)
 library(reshape2)
 library(ggplot2)
+library(RColorBrewer)
+library(waffle)
 library(xtable)
 library(knitr)
 library(rmarkdown)
@@ -127,7 +129,12 @@ agg1$tickets <- 2 ^ (agg1$year - 1)
 agg1[agg1$Var1 == "Sum", ]$year <- NA
 agg1[agg1$Var1 == "Sum", ]$tickets <- NA
 agg1 <- agg1[, c("year", "tickets", "Freq")]
-kable(agg1)
+freq <- agg1[!is.na(agg1$year), "Freq"]
+names(freq) <- sprintf("%d year", agg1[!is.na(agg1$year), "year"])
+waffle(freq, 
+       title = sprintf("Result of simulated lottery %d", i),
+       colors = brewer.pal(length(freq), "Spectral")) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 Okay... but what happened with the other `r size - 1` simulated lotteries?
