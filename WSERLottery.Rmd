@@ -119,7 +119,7 @@ Here's the distribution of the category of ticket holders from that random
 simulated lottery.
 I.e., in simulated lottery `r i`, 
 
-```{r, results='asis'}
+```{r exampleLottery, results='asis'}
 agg1 <- data.frame(addmargins(table(frameHat$year[sampLottery$runner])))
 agg1$year <- as.numeric(agg1$Var1)
 agg1$tickets <- 2 ^ (agg1$year - 1)
@@ -230,7 +230,7 @@ xlab <- "Probability of selection"
 options(scipen=999)
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Years in lottery"
-annolab <- sprintf("%.2f%%", simsum$Mean)
+annolab <- sprintf("%.2f%%", simsum$"Mean probability of selection")
 y1 <- max(density(frameSummary$prob[frameSummary$year == 1])$y)
 y2 <- max(density(frameSummary$prob[frameSummary$year == 2])$y)
 y3 <- max(density(frameSummary$prob[frameSummary$year == 3])$y)
@@ -244,7 +244,7 @@ ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
   scale_fill_brewer(palette="Spectral") + 
   scale_y_continuous(trans = "logit") + 
   labs(title=title, x=filllab, y=xlab, fill=filllab) +
-  annotate("text", label=annolab, y=simsum$Mean / 100, x=c(1:5+0.6, 6:7-0.5)) +
+  annotate("text", label=annolab, y=simsum$"Mean probability of selection" / 100, x=c(1:5+0.6, 6-0.5, 7 - 0.4)) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5))
 ```
@@ -263,7 +263,7 @@ title <- sprintf("%.0d WSER Lottery Selection Distribution Densities", as.numeri
 xlab <- "Number of entrants selected"
 ylab <- paste("Proportion of", format(size, big.mark=",", digits=0), "simulations")
 filllab <- "Years in lottery"
-annolab <- sprintf("%.1f", simsum$EV)
+annolab <- sprintf("%.1f", simsum$"Expected value")
 y1 <- max(density(frameSummary$freq[frameSummary$year == 1])$y)
 y2 <- max(density(frameSummary$freq[frameSummary$year == 2])$y)
 y3 <- max(density(frameSummary$freq[frameSummary$year == 3])$y)
@@ -277,7 +277,7 @@ ggplot(frameSummary, aes(x = year, y = freq, fill = year)) +
   scale_fill_brewer(palette="Spectral") + 
   scale_y_sqrt() + 
   labs(title=title, x=filllab, y=xlab, fill=filllab) +
-  annotate("text", label=annolab, y=simsum$EV, x=c(1:6+0.3, 7-0.4)) +
+  annotate("text", label=annolab, y=simsum$"Expected value", x=c(1:6+0.3, 7-0.6)) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5))
 ```
