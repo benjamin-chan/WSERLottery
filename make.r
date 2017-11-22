@@ -1,4 +1,4 @@
-setwd("~/R/Projects/WSERLottery")
+setwd("~/Projects/WSERLottery")
 library(checkpoint)
 checkpoint("2017-11-01", use.knitr = TRUE)
 library(knitr)
