@@ -72,7 +72,7 @@ Years (Tickets)	 	Entrants	 	Tickets
 
 
 ```r
-size <- 2.5E5  # Use 1E5 for production, 1E3 for testing
+size <- 5E5  # Use 1E5 for production, 1E3 for testing
 distn <- c(2668, 1058, 667, 282, 162, 71, 8)  # Number of entrants for each ticket count
 spots <- 261  # Number of spots up for grabs
 dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
@@ -170,33 +170,33 @@ sampLottery
 
 ```
 ## $lottery
-## [1] 197693
+## [1] 395386
 ## 
 ## $runner
-##   [1]   43  113  162  182  204  282  303  332  337  361  378  396  432  492
-##  [15]  643  711  972  984 1060 1127 1163 1173 1257 1335 1356 1363 1419 1567
-##  [29] 1610 1633 1676 1690 1748 1810 1849 1857 1875 1992 2040 2068 2077 2183
-##  [43] 2244 2273 2302 2445 2499 2573 2620 2621 2726 2728 2777 2798 2858 2867
-##  [57] 2872 2893 2981 2985 3014 3015 3022 3050 3053 3075 3088 3139 3141 3169
-##  [71] 3176 3328 3332 3359 3374 3402 3432 3441 3443 3448 3451 3456 3462 3464
-##  [85] 3494 3582 3601 3603 3646 3673 3684 3691 3697 3752 3756 3770 3788 3818
-##  [99] 3826 3830 3838 3850 3861 3871 3913 3926 3955 3974 3979 3985 3994 4025
-## [113] 4043 4045 4047 4058 4071 4091 4098 4102 4108 4118 4129 4134 4142 4153
-## [127] 4173 4190 4198 4218 4219 4239 4255 4259 4274 4281 4287 4297 4305 4331
-## [141] 4334 4354 4370 4387 4400 4413 4423 4431 4442 4443 4445 4459 4465 4466
-## [155] 4475 4487 4493 4496 4498 4499 4510 4516 4517 4519 4526 4550 4553 4570
-## [169] 4572 4573 4574 4594 4598 4600 4602 4611 4618 4622 4627 4643 4646 4647
-## [183] 4650 4657 4660 4667 4672 4681 4691 4696 4700 4702 4703 4704 4711 4714
-## [197] 4717 4720 4721 4723 4724 4726 4732 4733 4736 4741 4745 4747 4756 4757
-## [211] 4759 4760 4761 4783 4791 4802 4810 4825 4827 4830 4835 4838 4840 4843
-## [225] 4844 4847 4852 4855 4857 4858 4859 4862 4863 4864 4865 4866 4867 4870
-## [239] 4877 4879 4880 4881 4884 4886 4888 4891 4892 4895 4897 4898 4902 4903
-## [253] 4906 4907 4909 4910 4912 4913 4914 4915 4916
+##   [1]   70  169  243  316  327  410  435  440  578  686  753  832  837  876
+##  [15]  909  932  945  955  988 1021 1049 1102 1107 1108 1116 1145 1226 1285
+##  [29] 1315 1333 1385 1509 1515 1543 1562 1665 1687 1701 1740 1753 1851 1861
+##  [43] 1862 1907 1988 2002 2067 2211 2240 2251 2281 2375 2452 2494 2584 2615
+##  [57] 2630 2699 2700 2770 2804 2812 2854 2900 2904 2907 2931 2944 2968 3002
+##  [71] 3021 3028 3030 3072 3165 3171 3188 3197 3209 3217 3229 3237 3270 3275
+##  [85] 3304 3351 3380 3401 3403 3466 3475 3503 3551 3610 3611 3638 3660 3662
+##  [99] 3674 3677 3692 3731 3733 3735 3737 3755 3768 3788 3830 3837 3869 3886
+## [113] 3890 3891 3923 3930 3931 3939 3944 3947 3968 3976 3984 3987 3996 4009
+## [127] 4011 4015 4019 4053 4095 4111 4114 4120 4141 4143 4149 4190 4206 4235
+## [141] 4239 4268 4272 4281 4291 4292 4302 4310 4320 4325 4374 4377 4395 4405
+## [155] 4406 4424 4428 4429 4440 4443 4451 4457 4458 4467 4469 4478 4497 4510
+## [169] 4511 4517 4527 4528 4534 4541 4551 4564 4582 4590 4616 4617 4624 4625
+## [183] 4626 4633 4640 4644 4653 4654 4655 4674 4682 4694 4709 4713 4716 4719
+## [197] 4721 4724 4731 4733 4734 4737 4739 4744 4745 4750 4752 4753 4755 4766
+## [211] 4769 4772 4783 4785 4788 4789 4791 4792 4795 4797 4801 4816 4825 4826
+## [225] 4830 4831 4834 4835 4838 4840 4841 4844 4845 4846 4849 4851 4852 4854
+## [239] 4855 4856 4857 4858 4861 4865 4866 4873 4876 4881 4883 4889 4890 4892
+## [253] 4895 4903 4907 4909 4910 4911 4912 4914 4916
 ```
 
 Here's the distribution of the category of ticket holders from that random
 simulated lottery.
-I.e., in simulated lottery 197693, 
+I.e., in simulated lottery 395386, 
 
 
 ```r
@@ -216,7 +216,7 @@ waffle(freq,
 
 ![plot of chunk exampleLottery](figure/exampleLottery-1.png)
 
-Okay... but what happened with the other 2.49999 &times; 10<sup>5</sup> simulated lotteries?
+Okay... but what happened with the other 4.99999 &times; 10<sup>5</sup> simulated lotteries?
 
 ## Format lottery simulation data
 
@@ -305,7 +305,7 @@ names(simsum) <- c("Years in lottery",
 
 # Summarize lottery simulations
 
-Plot the distribution of probabilities from the 250,000
+Plot the distribution of probabilities from the 5e+05
 simulated lotteries.
 
 ## Probability of selection
@@ -341,7 +341,7 @@ ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
 ```
 
 ```
-## Warning: Removed 15500 rows containing non-finite values (stat_ydensity).
+## Warning: Removed 31142 rows containing non-finite values (stat_ydensity).
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities-1.png)
@@ -392,12 +392,12 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
 The probability all 64-ticket holders are selected is 
-6.19%.
+6.22%.
 
 
 # Outcome of sample of lotteries
 
-Sample of 250,000 simulated lotteries.
+Sample of 500,000 simulated lotteries.
 
 
 ```r
@@ -430,11 +430,11 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 
 
 ```
-## Timestamp: 2017-11-27 08:07:05
+## Timestamp: 2017-11-27 13:29:55
 ```
 
 ```
-## Number of cores used in simulation: 36
+## Number of cores used in simulation: 44
 ```
 
 ```
@@ -442,15 +442,15 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ```
 
 ```
-## Elapsed time of simulation: 15.009 minutes
+## Elapsed time of simulation: 41.633 minutes
 ```
 
 ```
-## Elapsed time of aggregation: 2.009 minutes
+## Elapsed time of aggregation: 5.071 minutes
 ```
 
 ```
-## R version 3.4.1 (2017-06-30)
+## R version 3.4.0 (2017-04-21)
 ## Platform: x86_64-redhat-linux-gnu (64-bit)
 ## Running under: CentOS Linux 7 (Core)
 ## 
@@ -469,11 +469,11 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_0.12.13     Rttf2pt1_1.3.4   magrittr_1.5     munsell_0.4.3   
 ##  [5] colorspace_1.3-2 rlang_0.1.2      highr_0.6        stringr_1.2.0   
-##  [9] plyr_1.8.4       tools_3.4.1      grid_3.4.1       gtable_0.2.0    
+##  [9] plyr_1.8.4       tools_3.4.0      grid_3.4.0       gtable_0.2.0    
 ## [13] extrafontdb_1.0  htmltools_0.3.6  lazyeval_0.2.1   rprojroot_1.2   
 ## [17] digest_0.6.12    tibble_1.3.4     gridExtra_2.3    codetools_0.2-15
-## [21] evaluate_0.10.1  labeling_0.3     stringi_1.1.5    compiler_3.4.1  
-## [25] methods_3.4.1    scales_0.5.0     backports_1.1.1  extrafont_0.17
+## [21] evaluate_0.10.1  labeling_0.3     stringi_1.1.5    compiler_3.4.0  
+## [25] methods_3.4.0    scales_0.5.0     backports_1.1.1  extrafont_0.17
 ```
 
 ```
@@ -484,7 +484,7 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ##                               version 
 ## "#1 SMP Wed Apr 12 15:04:24 UTC 2017" 
 ##                              nodename 
-##                  "exanode-4-32.local" 
+##                         "exanode-6-2" 
 ##                               machine 
 ##                              "x86_64" 
 ##                                 login 
