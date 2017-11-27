@@ -18,24 +18,35 @@ library(rmarkdown)
 Parameters to update.
 Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 
-> Total Tickets: 15066     Total Entrants: 4921
+> Total Tickets: 15084     Total Entrants: 4916
 > 
-> Last Updated: 11-20-2017 21:41:19 PST
+> Last Updated: 11-26-2017 20:26:49 PST
 > 
 > Years (Tickets) | Entrants| Tickets
 > :--------------:|:-------:|:------:
 > 7 (64) |    8 |  512
 > 6 (32) |   71 | 2272
-> 5 (16) |  161 | 2576
+> 5 (16) |  162 | 2592
 > 4 (8)  |  282 | 2256
-> 3 (4)  |  665 | 2660
-> 2 (2)  | 1056 | 2112
-> 1 (1)  | 2678 | 2678
+> 3 (4)  |  667 | 2668
+> 2 (2)  | 1058 | 2116
+> 1 (1)  | 2668 | 2668
+Total Tickets: 15084     Total Entrants: 4916
 
+Last Updated: 11-26-2017 20:26:49 PST
+
+Years (Tickets)	 	Entrants	 	Tickets
+7 (64)	 	8	 	512
+6 (32)	 	71	 	2272
+5 (16)	 	162	 	2592
+4 (8)	 	282	 	2256
+3 (4)	 	667	 	2668
+2 (2)	 	1058	 	2116
+1 (1)	 	2668	 	2668
 
 ```{r}
-distn <- c(2678, 1056, 665, 282, 161, 71, 8)  # Number of entrants for each ticket count
 size <- 1E6  # Use 1E5 for production, 1E3 for testing
+distn <- c(2668, 1058, 667, 282, 162, 71, 8)  # Number of entrants for each ticket count
 spots <- 261  # Number of spots up for grabs
 dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
