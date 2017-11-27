@@ -1,7 +1,4 @@
----
-title: "2018 Western States Endurance Run Lottery"
-author: "Benjamin Chan (https://github.com/benjamin-chan/WSERLottery)"
----
+# 2018 Western States Endurance Run Lottery
 
 Load packages.
 
@@ -9,8 +6,33 @@ Load packages.
 ```r
 library(parallel)
 library(doParallel)
+```
+
+```
+## Loading required package: foreach
+```
+
+```
+## Loading required package: iterators
+```
+
+```r
 library(data.table)
 library(reshape2)
+```
+
+```
+## 
+## Attaching package: 'reshape2'
+```
+
+```
+## The following objects are masked from 'package:data.table':
+## 
+##     dcast, melt
+```
+
+```r
 library(ggplot2)
 library(RColorBrewer)
 library(waffle)
@@ -22,26 +44,37 @@ library(rmarkdown)
 Parameters to update.
 Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 
-> Total Tickets: 15066     Total Entrants: 4921
+> Total Tickets: 15084     Total Entrants: 4916
 > 
-> Last Updated: 11-20-2017 21:41:19 PST
+> Last Updated: 11-26-2017 20:26:49 PST
 > 
 > Years (Tickets) | Entrants| Tickets
 > :--------------:|:-------:|:------:
 > 7 (64) |    8 |  512
 > 6 (32) |   71 | 2272
-> 5 (16) |  161 | 2576
+> 5 (16) |  162 | 2592
 > 4 (8)  |  282 | 2256
-> 3 (4)  |  665 | 2660
-> 2 (2)  | 1056 | 2112
-> 1 (1)  | 2678 | 2678
+> 3 (4)  |  667 | 2668
+> 2 (2)  | 1058 | 2116
+> 1 (1)  | 2668 | 2668
+Total Tickets: 15084     Total Entrants: 4916
 
+Last Updated: 11-26-2017 20:26:49 PST
+
+Years (Tickets)	 	Entrants	 	Tickets
+7 (64)	 	8	 	512
+6 (32)	 	71	 	2272
+5 (16)	 	162	 	2592
+4 (8)	 	282	 	2256
+3 (4)	 	667	 	2668
+2 (2)	 	1058	 	2116
+1 (1)	 	2668	 	2668
 
 
 ```r
-distn <- c(2678, 1056, 665, 282, 161, 71, 8)  # Number of entrants for each ticket count
-spots <- 250  # Number of spots up for grabs
-size <- 1E5  # Use 1E5 for production, 1E3 for testing
+size <- 2.5E5  # Use 1E5 for production, 1E3 for testing
+distn <- c(2668, 1058, 667, 282, 162, 71, 8)  # Number of entrants for each ticket count
+spots <- 261  # Number of spots up for grabs
 dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
 ```
 
@@ -70,13 +103,7 @@ correctly.
 ```r
 applicants <- sum(distn)
 runner <- seq(1, applicants)
-year <- c(rep(7, distn[7]),
-          rep(6, distn[6]),
-          rep(5, distn[5]),
-          rep(4, distn[4]),
-          rep(3, distn[3]),
-          rep(2, distn[2]),
-          rep(1, distn[1]))
+year <- rep(1:7, times = distn)
 tickets <- 2^(year - 1)
 frameHat <- data.frame(runner, year, tickets)
 frameHat$prob <- frameHat$tickets / sum(frameHat$tickets)
@@ -86,7 +113,7 @@ addmargins(table(factor(frameHat$tickets)))  # Check for match with `distn` vect
 ```
 ## 
 ##    1    2    4    8   16   32   64  Sum 
-## 2678 1056  665  282  161   71    8 4921
+## 2668 1058  667  282  162   71    8 4916
 ```
 
 ```r
@@ -97,13 +124,13 @@ kable(aggregate(prob ~ tickets, frameHat, mean))  # Check success probabilities 
 
 | tickets|      prob|
 |-------:|---------:|
-|       1| 0.0000664|
-|       2| 0.0001327|
-|       4| 0.0002655|
-|       8| 0.0005310|
-|      16| 0.0010620|
-|      32| 0.0021240|
-|      64| 0.0042480|
+|       1| 0.0000663|
+|       2| 0.0001326|
+|       4| 0.0002652|
+|       8| 0.0005304|
+|      16| 0.0010607|
+|      32| 0.0021215|
+|      64| 0.0042429|
 
 ## Simulate lottery
 
@@ -113,14 +140,14 @@ of eligible tickets.
 
 The matrix `lottery` is an $I \times J$ matrix where row $i$ is the $i$-th
 simulation and the column $j$ is the $j$-th lottery winner drawn. The number
-of columns in the matrix is 250, variable `spots`. The number of
+of columns in the matrix is 261, variable `spots`. The number of
 simulated lotteries is variable `size`. Set the random number seed as the date
 of the lottery in numeric form multipied by the number of applicants.
 
 
 ```r
 set.seed(as.numeric(dateLottery) * applicants)
-cores <- min(detectCores(), 4)
+cores <- detectCores()
 cl <- makeCluster(cores)
 registerDoParallel(cl)
 simTime <- system.time(
@@ -143,32 +170,33 @@ sampLottery
 
 ```
 ## $lottery
-## [1] 58892
+## [1] 197693
 ## 
 ## $runner
-##   [1]    2    3    4    9   10   13   15   16   20   22   27   29   30   31
-##  [15]   32   35   40   41   42   44   46   48   49   50   52   54   58   60
-##  [29]   63   65   66   67   70   72   75   77   89   99  101  105  108  118
-##  [43]  121  124  128  129  134  138  178  182  191  195  197  202  208  211
-##  [57]  212  213  214  224  235  236  244  247  261  276  277  294  308  310
-##  [71]  314  315  316  331  333  340  350  352  354  359  365  382  384  386
-##  [85]  389  390  399  402  405  415  431  432  450  470  481  496  504  512
-##  [99]  520  552  556  558  565  573  574  578  598  603  607  612  621  671
-## [113]  694  702  714  720  727  752  763  772  818  826  832  838  847  858
-## [127]  864  868  869  874  875  894  925  929  943  944  956  961  962  993
-## [141]  994 1003 1004 1008 1012 1035 1042 1060 1085 1095 1134 1140 1151 1181
-## [155] 1187 1207 1209 1231 1289 1306 1325 1357 1358 1374 1396 1424 1445 1449
-## [169] 1476 1501 1546 1558 1566 1587 1591 1614 1623 1660 1676 1698 1778 1783
-## [183] 1784 1814 1896 2057 2091 2095 2101 2107 2152 2169 2175 2191 2204 2312
-## [197] 2370 2398 2464 2475 2515 2516 2521 2547 2576 2671 2676 2783 2786 2799
-## [211] 2929 3009 3137 3142 3238 3342 3389 3431 3434 3484 3502 3542 3636 3736
-## [225] 3772 3785 3799 3817 3825 3838 3964 3978 3984 3985 4008 4022 4052 4164
-## [239] 4205 4261 4305 4317 4363 4395 4404 4593 4651 4783 4862 4886
+##   [1]   43  113  162  182  204  282  303  332  337  361  378  396  432  492
+##  [15]  643  711  972  984 1060 1127 1163 1173 1257 1335 1356 1363 1419 1567
+##  [29] 1610 1633 1676 1690 1748 1810 1849 1857 1875 1992 2040 2068 2077 2183
+##  [43] 2244 2273 2302 2445 2499 2573 2620 2621 2726 2728 2777 2798 2858 2867
+##  [57] 2872 2893 2981 2985 3014 3015 3022 3050 3053 3075 3088 3139 3141 3169
+##  [71] 3176 3328 3332 3359 3374 3402 3432 3441 3443 3448 3451 3456 3462 3464
+##  [85] 3494 3582 3601 3603 3646 3673 3684 3691 3697 3752 3756 3770 3788 3818
+##  [99] 3826 3830 3838 3850 3861 3871 3913 3926 3955 3974 3979 3985 3994 4025
+## [113] 4043 4045 4047 4058 4071 4091 4098 4102 4108 4118 4129 4134 4142 4153
+## [127] 4173 4190 4198 4218 4219 4239 4255 4259 4274 4281 4287 4297 4305 4331
+## [141] 4334 4354 4370 4387 4400 4413 4423 4431 4442 4443 4445 4459 4465 4466
+## [155] 4475 4487 4493 4496 4498 4499 4510 4516 4517 4519 4526 4550 4553 4570
+## [169] 4572 4573 4574 4594 4598 4600 4602 4611 4618 4622 4627 4643 4646 4647
+## [183] 4650 4657 4660 4667 4672 4681 4691 4696 4700 4702 4703 4704 4711 4714
+## [197] 4717 4720 4721 4723 4724 4726 4732 4733 4736 4741 4745 4747 4756 4757
+## [211] 4759 4760 4761 4783 4791 4802 4810 4825 4827 4830 4835 4838 4840 4843
+## [225] 4844 4847 4852 4855 4857 4858 4859 4862 4863 4864 4865 4866 4867 4870
+## [239] 4877 4879 4880 4881 4884 4886 4888 4891 4892 4895 4897 4898 4902 4903
+## [253] 4906 4907 4909 4910 4912 4913 4914 4915 4916
 ```
 
 Here's the distribution of the category of ticket holders from that random
 simulated lottery.
-I.e., in simulated lottery 58892, 
+I.e., in simulated lottery 197693, 
 
 
 ```r
@@ -188,13 +216,13 @@ waffle(freq,
 
 ![plot of chunk exampleLottery](figure/exampleLottery-1.png)
 
-Okay... but what happened with the other 99999 simulated lotteries?
+Okay... but what happened with the other 2.49999 &times; 10<sup>5</sup> simulated lotteries?
 
 ## Format lottery simulation data
 
 I'm not really interested in which runners were selected in the lottery
 simulation. What I'm really after are estimates for the probability of
-selecting a runner, among the 250 available spots, with $X$ tickets in
+selecting a runner, among the 261 available spots, with $X$ tickets in
 the initial hat.
 
 To get at this, first I'll have to match the runners selected to the number of
@@ -277,7 +305,7 @@ names(simsum) <- c("Years in lottery",
 
 # Summarize lottery simulations
 
-Plot the distribution of probabilities from the 100,000
+Plot the distribution of probabilities from the 250,000
 simulated lotteries.
 
 ## Probability of selection
@@ -313,7 +341,7 @@ ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
 ```
 
 ```
-## Warning: Removed 5137 rows containing non-finite values (stat_ydensity).
+## Warning: Removed 15500 rows containing non-finite values (stat_ydensity).
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities-1.png)
@@ -364,14 +392,12 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
 The probability all 64-ticket holders are selected is 
-5.12%.
+6.19%.
 
 
 # Outcome of sample of lotteries
 
-Estimated from 100,000 simulated lotteries.
-
-## Sample of simulated lotteries
+Sample of 250,000 simulated lotteries.
 
 
 ```r
@@ -400,64 +426,71 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ![plot of chunk sampleOutcomes](figure/sampleOutcomes-1.png)
 
 
-# Details
-
-Go to my [WSERLottery](https://github.com/benjamin-chan/WSERLottery) repository for the gory details.
-
-
 # Session info
 
 
 ```
-## Timestamp: 2017-11-20 22:57:58
+## Timestamp: 2017-11-27 08:07:05
 ```
 
 ```
-## Number of cores used in simulation: 2
+## Number of cores used in simulation: 36
 ```
 
 ```
-## Random number seed: 86127342
+## Random number seed: 86039832
 ```
 
 ```
-## Elapsed time of simulation: 4.951 minutes
+## Elapsed time of simulation: 15.009 minutes
 ```
 
 ```
-## Elapsed time of aggregation: 0.652 minutes
+## Elapsed time of aggregation: 2.009 minutes
 ```
 
 ```
-## R version 3.4.2 (2017-09-28)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows >= 8 x64 (build 9200)
+## R version 3.4.1 (2017-06-30)
+## Platform: x86_64-redhat-linux-gnu (64-bit)
+## Running under: CentOS Linux 7 (Core)
 ## 
 ## Matrix products: default
+## BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
 ## 
 ## attached base packages:
-## [1] parallel  stats     graphics  grDevices utils     datasets  methods  
-## [8] base     
+## [1] parallel  stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-##  [1] RColorBrewer_1.1-2  waffle_0.7.0        rmarkdown_1.6      
-##  [4] knitr_1.17          xtable_1.8-2        ggplot2_2.2.1      
-##  [7] reshape2_1.4.2      data.table_1.10.4-3 doParallel_1.0.11  
-## [10] iterators_1.0.8     foreach_1.4.3       checkpoint_0.4.2   
+##  [1] xtable_1.8-2        waffle_0.7.0        RColorBrewer_1.1-2 
+##  [4] ggplot2_2.2.1       reshape2_1.4.2      data.table_1.10.4-3
+##  [7] doParallel_1.0.11   iterators_1.0.8     foreach_1.4.3      
+## [10] rmarkdown_1.6       knitr_1.17          checkpoint_0.4.2   
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_0.12.13     Rttf2pt1_1.3.4   magrittr_1.5     munsell_0.4.3   
 ##  [5] colorspace_1.3-2 rlang_0.1.2      highr_0.6        stringr_1.2.0   
-##  [9] plyr_1.8.4       tools_3.4.2      grid_3.4.2       gtable_0.2.0    
-## [13] extrafontdb_1.0  htmltools_0.3.6  rprojroot_1.2    digest_0.6.12   
-## [17] yaml_2.1.14      lazyeval_0.2.1   tibble_1.3.4     gridExtra_2.3   
-## [21] codetools_0.2-15 evaluate_0.10.1  labeling_0.3     stringi_1.1.5   
-## [25] compiler_3.4.2   backports_1.1.1  scales_0.5.0     extrafont_0.17
+##  [9] plyr_1.8.4       tools_3.4.1      grid_3.4.1       gtable_0.2.0    
+## [13] extrafontdb_1.0  htmltools_0.3.6  lazyeval_0.2.1   rprojroot_1.2   
+## [17] digest_0.6.12    tibble_1.3.4     gridExtra_2.3    codetools_0.2-15
+## [21] evaluate_0.10.1  labeling_0.3     stringi_1.1.5    compiler_3.4.1  
+## [25] methods_3.4.1    scales_0.5.0     backports_1.1.1  extrafont_0.17
 ```
 
 ```
-##        sysname        release        version       nodename        machine 
-##      "Windows"     ">= 8 x64"   "build 9200"     "FAMILYPC"       "x86-64" 
-##          login           user effective_user 
-##          "Ben"          "Ben"          "Ben"
+##                               sysname 
+##                               "Linux" 
+##                               release 
+##          "3.10.0-514.16.1.el7.x86_64" 
+##                               version 
+## "#1 SMP Wed Apr 12 15:04:24 UTC 2017" 
+##                              nodename 
+##                  "exanode-4-32.local" 
+##                               machine 
+##                              "x86_64" 
+##                                 login 
+##                             "unknown" 
+##                                  user 
+##                               "chanb" 
+##                        effective_user 
+##                               "chanb"
 ```
