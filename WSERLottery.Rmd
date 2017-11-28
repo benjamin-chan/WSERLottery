@@ -100,9 +100,6 @@ stopCluster(cl)
 
 ```{r}
 i <- sample(seq(1, size), 1)
-sampLottery <- list(i, sort(lottery[i, ]))
-names(sampLottery) <- c("lottery", "runner")
-sampLottery
 ```
 
 Here's the distribution of the category of ticket holders from that random
@@ -110,6 +107,8 @@ simulated lottery.
 I.e., in simulated lottery `r i`, 
 
 ```{r exampleLottery, results='asis'}
+sampLottery <- list(i, sort(lottery[i, ]))
+names(sampLottery) <- c("lottery", "runner")
 agg1 <- data.frame(addmargins(table(frameHat$year[sampLottery$runner])))
 agg1$year <- as.numeric(agg1$Var1)
 agg1$tickets <- 2 ^ (agg1$year - 1)
@@ -125,6 +124,35 @@ waffle(freq,
 ```
 
 Okay... but what happened with the other `r size - 1` simulated lotteries?
+
+
+# Outcome of sample of lotteries
+
+Sample of `r format(size, big.mark=",")` simulated lotteries.
+
+```{r sampleOutcomes, results="asis"}
+s <- 20
+title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
+xlab <- "Simulated lottery"
+ylab <- "Number of selected runners\nEach block represents 10 runners"
+filllab <- "Years in lottery"
+i <- sample(seq(1, size), s)
+frameSample <- frameLottery[frameLottery$sim %in% i, ]
+frameSample$sim <- factor(frameSample$sim)
+levels(frameSample$sim) <- rev(levels(frameSample$sim))
+ggplot(frameSample, aes(x=sim, fill=year)) +
+  geom_bar(width=1) +
+  geom_hline(yintercept = seq(0, spots, 10), color="white") +
+  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
+  scale_fill_brewer(palette="Spectral") +
+  scale_y_continuous(expand=c(0, 0)) +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position="top",
+        plot.title = element_text(hjust = 0.5))
+```
+
 
 ## Format lottery simulation data
 
@@ -282,34 +310,6 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 
 The probability all `r max(tickets)`-ticket holders are selected is 
 `r sprintf("%.02f%%", nsim / size * 100)`.
-
-
-# Outcome of sample of lotteries
-
-Sample of `r format(size, big.mark=",")` simulated lotteries.
-
-```{r sampleOutcomes, results="asis"}
-s <- 20
-title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
-xlab <- "Simulated lottery"
-ylab <- "Number of selected runners\nEach block represents 10 runners"
-filllab <- "Years in lottery"
-i <- sample(seq(1, size), s)
-frameSample <- frameLottery[frameLottery$sim %in% i, ]
-frameSample$sim <- factor(frameSample$sim)
-levels(frameSample$sim) <- rev(levels(frameSample$sim))
-ggplot(frameSample, aes(x=sim, fill=year)) +
-  geom_bar(width=1) +
-  geom_hline(yintercept = seq(0, spots, 10), color="white") +
-  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
-  scale_fill_brewer(palette="Spectral") +
-  scale_y_continuous(expand=c(0, 0)) +
-  labs(title=title, x=xlab, y=ylab, fill=filllab) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position="top",
-        plot.title = element_text(hjust = 0.5))
-```
 
 
 # Session info
