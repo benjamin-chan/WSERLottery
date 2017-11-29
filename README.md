@@ -180,60 +180,6 @@ waffle(freq,
 Okay... but what happened with the other 4.99999 &times; 10<sup>5</sup> simulated lotteries?
 
 
-# Outcome of sample of lotteries
-
-Sample of 5e+05 simulated lotteries.
-
-
-```r
-s <- 20
-title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
-xlab <- "Simulated lottery"
-ylab <- "Number of selected runners\nEach block represents 10 runners"
-filllab <- "Years in lottery"
-i <- sample(seq(1, size), s)
-frameSample <- frameLottery[frameLottery$sim %in% i, ]
-```
-
-```
-## Error in eval(expr, envir, enclos): object 'frameLottery' not found
-```
-
-```r
-frameSample$sim <- factor(frameSample$sim)
-```
-
-```
-## Error in factor(frameSample$sim): object 'frameSample' not found
-```
-
-```r
-levels(frameSample$sim) <- rev(levels(frameSample$sim))
-```
-
-```
-## Error in levels(frameSample$sim): object 'frameSample' not found
-```
-
-```r
-ggplot(frameSample, aes(x=sim, fill=year)) +
-  geom_bar(width=1) +
-  geom_hline(yintercept = seq(0, spots, 10), color="white") +
-  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
-  scale_fill_brewer(palette="Spectral") +
-  scale_y_continuous(expand=c(0, 0)) +
-  labs(title=title, x=xlab, y=ylab, fill=filllab) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position="top",
-        plot.title = element_text(hjust = 0.5))
-```
-
-```
-## Error in ggplot(frameSample, aes(x = sim, fill = year)): object 'frameSample' not found
-```
-
-
 ## Format lottery simulation data
 
 I'm not really interested in which runners were selected in the lottery
@@ -319,6 +265,38 @@ names(simsum) <- c("Years in lottery",
                    "Expected value")
 ```
 
+
+## Outcome of sample of lotteries
+
+Sample of 5e+05 simulated lotteries.
+
+
+```r
+s <- 20
+title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
+xlab <- "Simulated lottery"
+ylab <- "Number of selected runners\nEach block represents 10 runners"
+filllab <- "Years in lottery"
+i <- sample(seq(1, size), s)
+frameSample <- frameLottery[frameLottery$sim %in% i, ]
+frameSample$sim <- factor(frameSample$sim)
+levels(frameSample$sim) <- rev(levels(frameSample$sim))
+ggplot(frameSample, aes(x=sim, fill=year)) +
+  geom_bar(width=1) +
+  geom_hline(yintercept = seq(0, spots, 10), color="white") +
+  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
+  scale_fill_brewer(palette="Spectral") +
+  scale_y_continuous(expand=c(0, 0)) +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position="top",
+        plot.title = element_text(hjust = 0.5))
+```
+
+![plot of chunk sampleOutcomes](figure/sampleOutcomes-1.png)
+
+
 # Summarize lottery simulations
 
 Plot the distribution of probabilities from the 5e+05
@@ -357,7 +335,7 @@ ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
 ```
 
 ```
-## Warning: Removed 31168 rows containing non-finite values (stat_ydensity).
+## Warning: Removed 30869 rows containing non-finite values (stat_ydensity).
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities-1.png)
@@ -408,14 +386,14 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
 The probability all 64-ticket holders are selected is 
-6.23%.
+6.17%.
 
 
 # Session info
 
 
 ```
-## Timestamp: 2017-11-28 15:28:47
+## Timestamp: 2017-11-29 09:47:40
 ```
 
 ```
@@ -427,11 +405,11 @@ The probability all 64-ticket holders are selected is
 ```
 
 ```
-## Elapsed time of simulation: 85.435 minutes
+## Elapsed time of simulation: 100.954 minutes
 ```
 
 ```
-## Elapsed time of aggregation: 6.425 minutes
+## Elapsed time of aggregation: 6.466 minutes
 ```
 
 ```
@@ -469,7 +447,7 @@ The probability all 64-ticket holders are selected is
 ##                               version 
 ## "#1 SMP Wed Apr 12 15:04:24 UTC 2017" 
 ##                              nodename 
-##                  "exanode-0-27.local" 
+##                  "exanode-2-23.local" 
 ##                               machine 
 ##                              "x86_64" 
 ##                                 login 
