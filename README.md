@@ -57,18 +57,6 @@ Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 > 3 (4)  |  667 | 2668
 > 2 (2)  | 1058 | 2116
 > 1 (1)  | 2668 | 2668
-Total Tickets: 15084     Total Entrants: 4916
-
-Last Updated: 11-26-2017 20:26:49 PST
-
-Years (Tickets)	 	Entrants	 	Tickets
-7 (64)	 	8	 	512
-6 (32)	 	71	 	2272
-5 (16)	 	162	 	2592
-4 (8)	 	282	 	2256
-3 (4)	 	667	 	2668
-2 (2)	 	1058	 	2116
-1 (1)	 	2668	 	2668
 
 
 ```r
@@ -163,35 +151,6 @@ stopCluster(cl)
 
 ```r
 i <- sample(seq(1, size), 1)
-sampLottery <- list(i, sort(lottery[i, ]))
-names(sampLottery) <- c("lottery", "runner")
-sampLottery
-```
-
-```
-## $lottery
-## [1] 395386
-## 
-## $runner
-##   [1]   70  169  243  316  327  410  435  440  578  686  753  832  837  876
-##  [15]  909  932  945  955  988 1021 1049 1102 1107 1108 1116 1145 1226 1285
-##  [29] 1315 1333 1385 1509 1515 1543 1562 1665 1687 1701 1740 1753 1851 1861
-##  [43] 1862 1907 1988 2002 2067 2211 2240 2251 2281 2375 2452 2494 2584 2615
-##  [57] 2630 2699 2700 2770 2804 2812 2854 2900 2904 2907 2931 2944 2968 3002
-##  [71] 3021 3028 3030 3072 3165 3171 3188 3197 3209 3217 3229 3237 3270 3275
-##  [85] 3304 3351 3380 3401 3403 3466 3475 3503 3551 3610 3611 3638 3660 3662
-##  [99] 3674 3677 3692 3731 3733 3735 3737 3755 3768 3788 3830 3837 3869 3886
-## [113] 3890 3891 3923 3930 3931 3939 3944 3947 3968 3976 3984 3987 3996 4009
-## [127] 4011 4015 4019 4053 4095 4111 4114 4120 4141 4143 4149 4190 4206 4235
-## [141] 4239 4268 4272 4281 4291 4292 4302 4310 4320 4325 4374 4377 4395 4405
-## [155] 4406 4424 4428 4429 4440 4443 4451 4457 4458 4467 4469 4478 4497 4510
-## [169] 4511 4517 4527 4528 4534 4541 4551 4564 4582 4590 4616 4617 4624 4625
-## [183] 4626 4633 4640 4644 4653 4654 4655 4674 4682 4694 4709 4713 4716 4719
-## [197] 4721 4724 4731 4733 4734 4737 4739 4744 4745 4750 4752 4753 4755 4766
-## [211] 4769 4772 4783 4785 4788 4789 4791 4792 4795 4797 4801 4816 4825 4826
-## [225] 4830 4831 4834 4835 4838 4840 4841 4844 4845 4846 4849 4851 4852 4854
-## [239] 4855 4856 4857 4858 4861 4865 4866 4873 4876 4881 4883 4889 4890 4892
-## [253] 4895 4903 4907 4909 4910 4911 4912 4914 4916
 ```
 
 Here's the distribution of the category of ticket holders from that random
@@ -200,6 +159,8 @@ I.e., in simulated lottery 395386,
 
 
 ```r
+sampLottery <- list(i, sort(lottery[i, ]))
+names(sampLottery) <- c("lottery", "runner")
 agg1 <- data.frame(addmargins(table(frameHat$year[sampLottery$runner])))
 agg1$year <- as.numeric(agg1$Var1)
 agg1$tickets <- 2 ^ (agg1$year - 1)
@@ -217,6 +178,61 @@ waffle(freq,
 ![plot of chunk exampleLottery](figure/exampleLottery-1.png)
 
 Okay... but what happened with the other 4.99999 &times; 10<sup>5</sup> simulated lotteries?
+
+
+# Outcome of sample of lotteries
+
+Sample of 5e+05 simulated lotteries.
+
+
+```r
+s <- 20
+title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
+xlab <- "Simulated lottery"
+ylab <- "Number of selected runners\nEach block represents 10 runners"
+filllab <- "Years in lottery"
+i <- sample(seq(1, size), s)
+frameSample <- frameLottery[frameLottery$sim %in% i, ]
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'frameLottery' not found
+```
+
+```r
+frameSample$sim <- factor(frameSample$sim)
+```
+
+```
+## Error in factor(frameSample$sim): object 'frameSample' not found
+```
+
+```r
+levels(frameSample$sim) <- rev(levels(frameSample$sim))
+```
+
+```
+## Error in levels(frameSample$sim): object 'frameSample' not found
+```
+
+```r
+ggplot(frameSample, aes(x=sim, fill=year)) +
+  geom_bar(width=1) +
+  geom_hline(yintercept = seq(0, spots, 10), color="white") +
+  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
+  scale_fill_brewer(palette="Spectral") +
+  scale_y_continuous(expand=c(0, 0)) +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position="top",
+        plot.title = element_text(hjust = 0.5))
+```
+
+```
+## Error in ggplot(frameSample, aes(x = sim, fill = year)): object 'frameSample' not found
+```
+
 
 ## Format lottery simulation data
 
@@ -341,7 +357,7 @@ ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
 ```
 
 ```
-## Warning: Removed 31142 rows containing non-finite values (stat_ydensity).
+## Warning: Removed 31168 rows containing non-finite values (stat_ydensity).
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities-1.png)
@@ -392,49 +408,18 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
 The probability all 64-ticket holders are selected is 
-6.22%.
-
-
-# Outcome of sample of lotteries
-
-Sample of 500,000 simulated lotteries.
-
-
-```r
-s <- 20
-title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
-xlab <- "Simulated lottery"
-ylab <- "Number of selected runners\nEach block represents 10 runners"
-filllab <- "Years in lottery"
-i <- sample(seq(1, size), s)
-frameSample <- frameLottery[frameLottery$sim %in% i, ]
-frameSample$sim <- factor(frameSample$sim)
-levels(frameSample$sim) <- rev(levels(frameSample$sim))
-ggplot(frameSample, aes(x=sim, fill=year)) +
-  geom_bar(width=1) +
-  geom_hline(yintercept = seq(0, spots, 10), color="white") +
-  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
-  scale_fill_brewer(palette="Spectral") +
-  scale_y_continuous(expand=c(0, 0)) +
-  labs(title=title, x=xlab, y=ylab, fill=filllab) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position="top",
-        plot.title = element_text(hjust = 0.5))
-```
-
-![plot of chunk sampleOutcomes](figure/sampleOutcomes-1.png)
+6.23%.
 
 
 # Session info
 
 
 ```
-## Timestamp: 2017-11-27 13:29:55
+## Timestamp: 2017-11-28 15:28:47
 ```
 
 ```
-## Number of cores used in simulation: 44
+## Number of cores used in simulation: 24
 ```
 
 ```
@@ -442,15 +427,15 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ```
 
 ```
-## Elapsed time of simulation: 41.633 minutes
+## Elapsed time of simulation: 85.435 minutes
 ```
 
 ```
-## Elapsed time of aggregation: 5.071 minutes
+## Elapsed time of aggregation: 6.425 minutes
 ```
 
 ```
-## R version 3.4.0 (2017-04-21)
+## R version 3.4.1 (2017-06-30)
 ## Platform: x86_64-redhat-linux-gnu (64-bit)
 ## Running under: CentOS Linux 7 (Core)
 ## 
@@ -469,11 +454,11 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_0.12.13     Rttf2pt1_1.3.4   magrittr_1.5     munsell_0.4.3   
 ##  [5] colorspace_1.3-2 rlang_0.1.2      highr_0.6        stringr_1.2.0   
-##  [9] plyr_1.8.4       tools_3.4.0      grid_3.4.0       gtable_0.2.0    
+##  [9] plyr_1.8.4       tools_3.4.1      grid_3.4.1       gtable_0.2.0    
 ## [13] extrafontdb_1.0  htmltools_0.3.6  lazyeval_0.2.1   rprojroot_1.2   
 ## [17] digest_0.6.12    tibble_1.3.4     gridExtra_2.3    codetools_0.2-15
-## [21] evaluate_0.10.1  labeling_0.3     stringi_1.1.5    compiler_3.4.0  
-## [25] methods_3.4.0    scales_0.5.0     backports_1.1.1  extrafont_0.17
+## [21] evaluate_0.10.1  labeling_0.3     stringi_1.1.5    compiler_3.4.1  
+## [25] methods_3.4.1    scales_0.5.0     backports_1.1.1  extrafont_0.17
 ```
 
 ```
@@ -484,7 +469,7 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 ##                               version 
 ## "#1 SMP Wed Apr 12 15:04:24 UTC 2017" 
 ##                              nodename 
-##                         "exanode-6-2" 
+##                  "exanode-0-27.local" 
 ##                               machine 
 ##                              "x86_64" 
 ##                                 login 
