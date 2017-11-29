@@ -126,34 +126,6 @@ waffle(freq,
 Okay... but what happened with the other `r size - 1` simulated lotteries?
 
 
-# Outcome of sample of lotteries
-
-Sample of `r format(size, big.mark=",")` simulated lotteries.
-
-```{r sampleOutcomes, results="asis"}
-s <- 20
-title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
-xlab <- "Simulated lottery"
-ylab <- "Number of selected runners\nEach block represents 10 runners"
-filllab <- "Years in lottery"
-i <- sample(seq(1, size), s)
-frameSample <- frameLottery[frameLottery$sim %in% i, ]
-frameSample$sim <- factor(frameSample$sim)
-levels(frameSample$sim) <- rev(levels(frameSample$sim))
-ggplot(frameSample, aes(x=sim, fill=year)) +
-  geom_bar(width=1) +
-  geom_hline(yintercept = seq(0, spots, 10), color="white") +
-  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
-  scale_fill_brewer(palette="Spectral") +
-  scale_y_continuous(expand=c(0, 0)) +
-  labs(title=title, x=xlab, y=ylab, fill=filllab) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position="top",
-        plot.title = element_text(hjust = 0.5))
-```
-
-
 ## Format lottery simulation data
 
 I'm not really interested in which runners were selected in the lottery
@@ -234,6 +206,35 @@ names(simsum) <- c("Years in lottery",
                    "Mean probability of selection", 
                    "Expected value")
 ```
+
+
+## Outcome of sample of lotteries
+
+Sample of `r format(size, big.mark=",")` simulated lotteries.
+
+```{r sampleOutcomes, results="asis"}
+s <- 20
+title <- sprintf("Simulated %.0d WSER Lotteries\nSample of %.0f Lotteries", as.numeric(format(dateLottery, "%Y")) + 1, s)
+xlab <- "Simulated lottery"
+ylab <- "Number of selected runners\nEach block represents 10 runners"
+filllab <- "Years in lottery"
+i <- sample(seq(1, size), s)
+frameSample <- frameLottery[frameLottery$sim %in% i, ]
+frameSample$sim <- factor(frameSample$sim)
+levels(frameSample$sim) <- rev(levels(frameSample$sim))
+ggplot(frameSample, aes(x=sim, fill=year)) +
+  geom_bar(width=1) +
+  geom_hline(yintercept = seq(0, spots, 10), color="white") +
+  geom_vline(xintercept = seq(1, s)-0.5, color="white") +
+  scale_fill_brewer(palette="Spectral") +
+  scale_y_continuous(expand=c(0, 0)) +
+  labs(title=title, x=xlab, y=ylab, fill=filllab) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position="top",
+        plot.title = element_text(hjust = 0.5))
+```
+
 
 # Summarize lottery simulations
 
