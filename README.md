@@ -60,7 +60,7 @@ Source: [2018 WSER Lottery Entrants](http://www.wser.org/lottery2018.html).
 
 
 ```r
-size <- 1E5  # Use 1E5 for production, 1E3 for testing
+size <- 5E5  # Use 1E5 for production, 1E3 for testing
 distn <- c(2668, 1058, 667, 282, 162, 71, 8)  # Number of entrants for each ticket count
 spots <- 261  # Number of spots up for grabs
 dateLottery <- as.Date("2017-12-02", format="%Y-%m-%d")  # Random number seed; use lottery date
@@ -155,7 +155,7 @@ i <- sample(seq(1, size), 1)
 
 Here's the distribution of the category of ticket holders from that random
 simulated lottery.
-I.e., in simulated lottery 79078, 
+I.e., in simulated lottery 395386, 
 
 
 ```r
@@ -177,7 +177,7 @@ waffle(freq,
 
 ![plot of chunk exampleLottery](figure/exampleLottery-1.png)
 
-Okay... but what happened with the other 9.9999 &times; 10<sup>4</sup> simulated lotteries?
+Okay... but what happened with the other 4.99999 &times; 10<sup>5</sup> simulated lotteries?
 
 
 ## Format lottery simulation data
@@ -268,7 +268,7 @@ names(simsum) <- c("Years in lottery",
 
 ## Outcome of sample of lotteries
 
-Sample of 1e+05 simulated lotteries.
+Sample of 5e+05 simulated lotteries.
 
 
 ```r
@@ -299,7 +299,7 @@ ggplot(frameSample, aes(x=sim, fill=year)) +
 
 # Summarize lottery simulations
 
-Plot the distribution of probabilities from the 1e+05
+Plot the distribution of probabilities from the 5e+05
 simulated lotteries.
 
 ## Probability of selection
@@ -335,7 +335,7 @@ ggplot(frameSummary, aes(x = year, y = prob / 100, fill = year)) +
 ```
 
 ```
-## Warning: Removed 6173 rows containing non-finite values (stat_ydensity).
+## Warning: Removed 31272 rows containing non-finite values (stat_ydensity).
 ```
 
 ![plot of chunk PlotProbabilities](figure/PlotProbabilities-1.png)
@@ -386,14 +386,14 @@ nsim <- df[df$freq == max(df$freq), "sim"]
 ```
 
 The probability all 64-ticket holders are selected is 
-6.17%.
+6.25%.
 
 
 # Session info
 
 
 ```
-## Timestamp: 2017-11-29 14:22:35
+## Timestamp: 2017-12-01 11:57:26
 ```
 
 ```
@@ -405,11 +405,11 @@ The probability all 64-ticket holders are selected is
 ```
 
 ```
-## Elapsed time of simulation: 3.590 minutes
+## Elapsed time of simulation: 82.039 minutes
 ```
 
 ```
-## Elapsed time of aggregation: 0.577 minutes
+## Elapsed time of aggregation: 6.546 minutes
 ```
 
 ```
@@ -443,7 +443,7 @@ The probability all 64-ticket holders are selected is
 ##                              sysname                              release 
 ##                              "Linux"         "3.10.0-514.26.2.el7.x86_64" 
 ##                              version                             nodename 
-## "#1 SMP Tue Jul 4 15:04:05 UTC 2017"                        "exanode-2-7" 
+## "#1 SMP Tue Jul 4 15:04:05 UTC 2017"                       "exanode-2-21" 
 ##                              machine                                login 
 ##                             "x86_64"                            "unknown" 
 ##                                 user                       effective_user 
